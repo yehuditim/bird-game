@@ -21,11 +21,11 @@ function getOptions(correct: Bird, all: Bird[]): string[] {
   return shuffle([correct.hebrewName, ...others]);
 }
 
-interface GameProps {
-  onQuit: () => void;
-}
-
 type AnswerState = 'unanswered' | 'correct' | 'wrong';
+
+interface WrongEntry { bird: Bird; chosen: string; }
+
+interface GameProps { onQuit: () => void; }
 
 export function Game({ onQuit }: GameProps) {
   const [questions] = useState<Bird[]>(() =>
@@ -36,36 +36,38 @@ export function Game({ onQuit }: GameProps) {
   const [selected, setSelected] = useState<string | null>(null);
   const [answerState, setAnswerState] = useState<AnswerState>('unanswered');
   const [score, setScore] = useState(0);
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [imageError, setImageError] = useState(false);
-  const [wrongAnswers, setWrongAnswers] = useState<{ bird: Bird; chosen: string }[]>([]);
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [imgError, setImgError] = useState(false);
+  const [wrongAnswers, setWrongAnswers] = useState<WrongEntry[]>([]);
+  const [results, setResults] = useState<('correct' | 'wrong')[]>([]);
   const [finished, setFinished] = useState(false);
 
-  const currentBird = questions[currentIndex];
+  const current = questions[currentIndex];
 
   useEffect(() => {
-    if (currentBird) {
-      setOptions(getOptions(currentBird, birds));
-      setSelected(null);
-      setAnswerState('unanswered');
-      setImageLoaded(false);
-      setImageError(false);
-    }
-  }, [currentIndex, currentBird]);
+    if (!current) return;
+    setOptions(getOptions(current, birds));
+    setSelected(null);
+    setAnswerState('unanswered');
+    setImgLoaded(false);
+    setImgError(false);
+  }, [currentIndex, current]);
 
   const handleAnswer = useCallback(
     (option: string) => {
       if (answerState !== 'unanswered') return;
       setSelected(option);
-      if (option === currentBird.hebrewName) {
-        setAnswerState('correct');
+      const isCorrect = option === current.hebrewName;
+      setAnswerState(isCorrect ? 'correct' : 'wrong');
+      if (isCorrect) {
         setScore((s) => s + 1);
+        setResults((r) => [...r, 'correct']);
       } else {
-        setAnswerState('wrong');
-        setWrongAnswers((prev) => [...prev, { bird: currentBird, chosen: option }]);
+        setWrongAnswers((w) => [...w, { bird: current, chosen: option }]);
+        setResults((r) => [...r, 'wrong']);
       }
     },
-    [answerState, currentBird]
+    [answerState, current]
   );
 
   const handleNext = useCallback(() => {
@@ -76,118 +78,118 @@ export function Game({ onQuit }: GameProps) {
     }
   }, [currentIndex]);
 
-  const handleRestart = () => {
-    window.location.reload();
-  };
-
   if (finished) {
     return (
       <ResultScreen
         score={score}
         total={QUESTIONS_PER_ROUND}
         wrongAnswers={wrongAnswers}
-        onRestart={handleRestart}
+        onRestart={() => window.location.reload()}
       />
     );
   }
 
-  const getOptionClass = (option: string) => {
-    if (answerState === 'unanswered') return 'option-btn';
-    if (option === currentBird.hebrewName) return 'option-btn correct';
-    if (option === selected) return 'option-btn wrong';
-    return 'option-btn disabled';
+  const optClass = (opt: string) => {
+    if (answerState === 'unanswered') return 'opt-btn';
+    if (opt === current.hebrewName) return 'opt-btn state-correct';
+    if (opt === selected)            return 'opt-btn state-wrong';
+    return 'opt-btn state-dim';
   };
 
   return (
     <div className="game-screen">
+      {/* ── Header ── */}
       <header className="game-header">
-        <button className="quit-btn" onClick={onQuit}>
-          ← יציאה
-        </button>
-        <div className="progress-info">
-          <span className="question-counter">
-            שאלה {currentIndex + 1} / {QUESTIONS_PER_ROUND}
-          </span>
-          <span className="score-info">ניקוד: {score}</span>
+        <button className="quit-btn" onClick={onQuit}>← יציאה</button>
+
+        <div className="progress-dots">
+          {Array.from({ length: QUESTIONS_PER_ROUND }, (_, i) => {
+            let cls = 'dot';
+            if (i < results.length) cls = `dot answered-${results[i]}`;
+            else if (i === currentIndex) cls = 'dot current';
+            return <span key={i} className={cls} />;
+          })}
         </div>
+
+        <div className="score-chip">⭐ {score}</div>
       </header>
 
-      <div className="progress-bar-container">
-        <div
-          className="progress-bar"
-          style={{ width: `${((currentIndex + 1) / QUESTIONS_PER_ROUND) * 100}%` }}
+      {/* ── Bird image ── */}
+      <div className="bird-image-wrap">
+        {/* blurred background */}
+        {imgLoaded && (
+          <div
+            className="bird-image-blur"
+            style={{ backgroundImage: `url(${current.imageUrl})` }}
+          />
+        )}
+
+        {/* skeleton */}
+        {!imgLoaded && !imgError && (
+          <div className="bird-img-skeleton">
+            <span className="spin-icon">⏳</span>
+            <span>טוען תמונה...</span>
+          </div>
+        )}
+        {imgError && (
+          <div className="bird-img-skeleton">
+            <span style={{ fontSize: '2.5rem' }}>🐦</span>
+            <span>תמונה לא זמינה</span>
+          </div>
+        )}
+
+        <img
+          key={current.id}
+          src={current.imageUrl}
+          alt="ציפור לזיהוי"
+          className={`bird-img ${imgLoaded ? 'loaded' : 'loading'}`}
+          onLoad={() => setImgLoaded(true)}
+          onError={() => { setImgError(true); setImgLoaded(false); }}
         />
+
+        {current.seasonal && (
+          <div className="seasonal-tag">
+            {current.seasonal === 'winter' ? '❄️ חורפת' : '☀️ מקייצת'}
+          </div>
+        )}
       </div>
 
-      <main className="game-main">
-        <div className="bird-image-container">
-          {!imageLoaded && !imageError && (
-            <div className="image-placeholder">
-              <span className="loading-spinner">⏳</span>
-              <span>טוען תמונה...</span>
-            </div>
-          )}
-          {imageError && (
-            <div className="image-placeholder image-error">
-              <span>🐦</span>
-              <span>תמונה לא זמינה</span>
-            </div>
-          )}
-          <img
-            key={currentBird.id}
-            src={currentBird.imageUrl}
-            alt="איזו ציפור זו?"
-            className={`bird-image ${imageLoaded ? 'visible' : 'hidden'}`}
-            onLoad={() => setImageLoaded(true)}
-            onError={() => { setImageError(true); setImageLoaded(false); }}
-          />
-          {currentBird.seasonal && (
-            <div className="seasonal-badge">
-              {currentBird.seasonal === 'winter' ? '❄️ חורפת' : '☀️ מקייצת'}
-            </div>
-          )}
-        </div>
-
-        <p className="question-text">מה שם הציפור הזו?</p>
+      {/* ── Body ── */}
+      <div className="game-body">
+        <p className="question-label">מה שם הציפור הזו?</p>
 
         <div className="options-grid">
-          {options.map((option) => (
+          {options.map((opt) => (
             <button
-              key={option}
-              className={getOptionClass(option)}
-              onClick={() => handleAnswer(option)}
+              key={opt}
+              className={optClass(opt)}
+              onClick={() => handleAnswer(opt)}
               disabled={answerState !== 'unanswered'}
             >
-              {option}
+              {opt}
             </button>
           ))}
         </div>
 
         {answerState !== 'unanswered' && (
-          <div className={`feedback ${answerState}`}>
-            {answerState === 'correct' ? (
-              <>
-                <div className="feedback-title">✅ נכון!</div>
-                <div className="feedback-bird-name">{currentBird.hebrewName}</div>
-                <div className="feedback-english">{currentBird.englishName}</div>
-                <div className="feedback-fun-fact">💡 {currentBird.funFact}</div>
-              </>
-            ) : (
-              <>
-                <div className="feedback-title">❌ לא נכון</div>
-                <div className="feedback-bird-name">
-                  התשובה הנכונה: {currentBird.hebrewName}
-                </div>
-                <div className="feedback-english">{currentBird.englishName}</div>
-                <div className="feedback-fun-fact">💡 {currentBird.funFact}</div>
-              </>
-            )}
+          <div className={`feedback-panel ${answerState}`}>
+            <div className="feedback-verdict">
+              {answerState === 'correct' ? '✅ נכון!' : '❌ לא נכון'}
+            </div>
+
+            <div className="feedback-names">
+              <div className="feedback-he">{current.hebrewName}</div>
+              <div className="feedback-en">{current.englishName}</div>
+            </div>
+
+            <div className="feedback-fact">💡 {current.funFact}</div>
+
             <button className="next-btn" onClick={handleNext}>
-              {currentIndex + 1 >= QUESTIONS_PER_ROUND ? 'סיים משחק 🏁' : 'הבא ⬅️'}
+              {currentIndex + 1 >= QUESTIONS_PER_ROUND ? '🏁 סיום המשחק' : 'הבא ←'}
             </button>
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 }
