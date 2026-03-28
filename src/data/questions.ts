@@ -3,14 +3,13 @@ import { birds, Bird } from './birds';
 export interface GameQuestion {
   id: string;
   type: 'identify' | 'trivia';
-  // identify only
   bird?: Bird;
   imageUrl?: string;
-  // shared
   questionText: string;
   options: string[];
   answer: string;
   explanation: string;
+  isBonus?: boolean;
 }
 
 function shuffle<T>(arr: T[]): T[] {
@@ -62,14 +61,14 @@ const triviaData: Omit<GameQuestion, 'id'>[] = [
   {
     type: 'trivia',
     questionText: 'מי גדולה יותר — שחרור או דרור הבית?',
-    options: shuffle(['שחרור', 'דרור הבית', 'שניהם שווים', 'לא ניתן לדעת']),
+    options: shuffle(['שחרור', 'דרור הבית', 'שניהם שווים', 'קשה לדעת']),
     answer: 'שחרור',
     explanation: 'השחרור מגיע לכ-25 ס"מ, ואילו דרור הבית — רק 14 ס"מ.'
   },
   {
     type: 'trivia',
     questionText: 'מי גדולה יותר — בז מצוי או דוכיפת?',
-    options: shuffle(['בז מצוי', 'דוכיפת', 'שניהם שווים', 'לא ניתן לדעת']),
+    options: shuffle(['בז מצוי', 'דוכיפת', 'שניהם שווים', 'קשה לדעת']),
     answer: 'בז מצוי',
     explanation: 'הבז המצוי מגיע לכ-35 ס"מ, הדוכיפת לכ-28 ס"מ.'
   },
@@ -79,6 +78,14 @@ const triviaData: Omit<GameQuestion, 'id'>[] = [
     options: shuffle(['אנפית בקר', 'שרקרק מצוי', 'מאינה', 'נקר סורי']),
     answer: 'אנפית בקר',
     explanation: 'אנפית הבקר מגיעה לכ-50 ס"מ — הגדולה מכולן!'
+  },
+  {
+    type: 'trivia',
+    isBonus: true,
+    questionText: 'מי קטנה יותר — עלווית חורף או פשוש?',
+    options: shuffle(['פשוש', 'עלווית חורף', 'שניהם שווים', 'תלוי בפרט']),
+    answer: 'פשוש',
+    explanation: 'הפשוש (11 ס"מ) קטן מהעלווית (11-12 ס"מ) — שניהם זעירים!'
   },
 
   // ── מראה ────────────────────────────────────────────────────────────────────
@@ -91,7 +98,7 @@ const triviaData: Omit<GameQuestion, 'id'>[] = [
   },
   {
     type: 'trivia',
-    questionText: 'לאיזו ציפור יש חזה צהוב, לחיים לבנות ו"עניבה" שחורה?',
+    questionText: 'לאיזו ציפור יש חזה צהוב ו"עניבה" שחורה?',
     options: shuffle(['ירגזי', 'חוחית', 'ירקון', 'פרוש מצוי']),
     answer: 'ירגזי',
     explanation: 'הירגזי ניתן לזיהוי קל: חזה צהוב עם פס שחור אנכי — ממש כמו עניבה!'
@@ -105,6 +112,7 @@ const triviaData: Omit<GameQuestion, 'id'>[] = [
   },
   {
     type: 'trivia',
+    isBonus: true,
     questionText: 'לאיזו ציפור יש צבעים כחולים-מטאליים מבריקים?',
     options: shuffle(['צופית בוהקת', 'ירקון', 'שלדג לבן-חזה', 'נחליאלי לבן']),
     answer: 'צופית בוהקת',
@@ -112,7 +120,7 @@ const triviaData: Omit<GameQuestion, 'id'>[] = [
   },
   {
     type: 'trivia',
-    questionText: 'לאיזו ציפור יש "שת" (עורף תחתון) צהוב?',
+    questionText: 'לאיזו ציפור יש כתם צהוב מתחת לזנב?',
     options: shuffle(['בולבול', 'ירגזי', 'עפרוני מצויץ', 'חוחית']),
     answer: 'בולבול',
     explanation: 'לבולבול יש כתם צהוב מובהק מתחת לזנבו — סימן זיהוי קלאסי!'
@@ -126,10 +134,17 @@ const triviaData: Omit<GameQuestion, 'id'>[] = [
   },
   {
     type: 'trivia',
-    questionText: 'לאיזו ציפור יש כנפיים מפוספסות שחור-לבן כמו זברה?',
+    questionText: 'לאיזו ציפור יש כנפיים מפוספסות שחור-לבן?',
     options: shuffle(['דוכיפת', 'סיקסק', 'נקר סורי', 'שחרור']),
     answer: 'דוכיפת',
     explanation: 'כנפי הדוכיפת מפוספסות שחור-לבן בצורה בולטת — אי-אפשר לפספס אותה!'
+  },
+  {
+    type: 'trivia',
+    questionText: 'איזו ציפור שחורה כולה עם מקור כתום-צהוב?',
+    options: shuffle(['שחרור', 'קאק', 'עורב אפור', 'זרזיר']),
+    answer: 'שחרור',
+    explanation: 'הזכר של השחרור שחור לגמרי, ומקורו כתום-צהוב בולט — אי אפשר לטעות!'
   },
 
   // ── התנהגות ─────────────────────────────────────────────────────────────────
@@ -145,10 +160,11 @@ const triviaData: Omit<GameQuestion, 'id'>[] = [
     questionText: 'איזו ציפור מרחפת במקום מול הרוח כשהיא מחפשת טרף?',
     options: shuffle(['בז מצוי', 'עורבני', 'שרקרק מצוי', 'מאינה']),
     answer: 'בז מצוי',
-    explanation: 'הבז "תולה" את עצמו באוויר — ריחוף מקום — ועיניו רואות עכברים מרחק של 50 מטר!'
+    explanation: 'הבז "תולה" את עצמו באוויר — ריחוף מקום — ועיניו רואות עכברים ממרחק של 50 מטר!'
   },
   {
     type: 'trivia',
+    isBonus: true,
     questionText: 'איזו ציפור בונה קן בצורת אגס סגור עם פתח צדי?',
     options: shuffle(['פשוש', 'עלווית חורף', 'ירגזי', 'בולבול']),
     answer: 'פשוש',
@@ -178,12 +194,13 @@ const triviaData: Omit<GameQuestion, 'id'>[] = [
   {
     type: 'trivia',
     questionText: 'לאיזו ציפור יש שירה שנשמעת כמו צחוק?',
-    options: shuffle(['צוצלת', 'מיינה', 'זרזיר', 'בולבול']),
+    options: shuffle(['צוצלת', 'מאינה', 'זרזיר', 'בולבול']),
     answer: 'צוצלת',
     explanation: 'הצוצלת נקראת Laughing Dove — קריאתה נשמעת כמו צחוק נעים.'
   },
   {
     type: 'trivia',
+    isBonus: true,
     questionText: 'איזו ציפור שואבת צוף מפרחים בעודה מרחפת?',
     options: shuffle(['צופית בוהקת', 'חוחית', 'ירקון', 'פרוש מצוי']),
     answer: 'צופית בוהקת',
@@ -200,21 +217,22 @@ const triviaData: Omit<GameQuestion, 'id'>[] = [
   },
   {
     type: 'trivia',
-    questionText: 'מי מבין הציפורים האלה חורפת בישראל אך אינה קבועה?',
+    questionText: 'מי מבין הציפורים האלה חורפת בישראל בלבד?',
     options: shuffle(['אדום חזה', 'בולבול', 'דרור הבית', 'יונה']),
     answer: 'אדום חזה',
     explanation: 'אדום החזה מגיע לישראל בסתיו ועוזב באביב — הוא חורף, לא תושב קבוע.'
   },
   {
     type: 'trivia',
-    questionText: 'איזו ציפור נחשבת ייחודית (אנדמית) לאזור ישראל והמזרח התיכון?',
+    isBonus: true,
+    questionText: 'איזו ציפור נחשבת ייחודית לאזור ישראל והמזרח התיכון?',
     options: shuffle(['בולבול', 'זרזיר', 'אדום חזה', 'פרוש מצוי']),
     answer: 'בולבול',
     explanation: 'הבולבול הוא אנדמי לאזורנו — מפוץ רק בישראל ומדינות שכנות.'
   },
   {
     type: 'trivia',
-    questionText: 'מי מבין הציפורים האלה מסייעת להדברת חרקים בגינה?',
+    questionText: 'מי מסייעת להדברת חרקים בגינה?',
     options: shuffle(['ירגזי', 'דרור הבית', 'יונה', 'עורב אפור']),
     answer: 'ירגזי',
     explanation: 'הירגזי ניזון מחיפושיות, זחלים ופרפרים — סיוע טבעי נפלא לגינן!'
@@ -230,22 +248,23 @@ const triviaData: Omit<GameQuestion, 'id'>[] = [
 
 // ─── EXPORT ──────────────────────────────────────────────────────────────────
 
-/** Full question pool: all identify questions + all trivia */
-export function buildFullPool(): GameQuestion[] {
-  const identifyQs = buildIdentifyQuestions();
-  const triviaQs = triviaData.map((q, i) => ({ ...q, id: `trivia-${i}` }));
-  return shuffle([...identifyQs, ...triviaQs]);
-}
-
-/** Pick `count` questions, ensuring all 40 birds appear at least once in identify Qs */
+/** Pick `count` questions with trivia mixed in (~30% trivia) */
 export function pickQuestions(count: number): GameQuestion[] {
   const identifyQs = shuffle(buildIdentifyQuestions());
-  const triviaQs = shuffle(
-    triviaData.map((q, i) => ({ ...q, id: `trivia-${i}` }))
-  );
+  const triviaQs = shuffle(triviaData.map((q, i) => ({ ...q, id: `trivia-${i}` })));
 
-  // Take all 40 identify + fill rest with trivia (up to count)
-  const base = identifyQs.slice(0, Math.min(40, count));
-  const extra = triviaQs.slice(0, Math.max(0, count - base.length));
-  return shuffle([...base, ...extra]);
+  const triviaCount = Math.min(Math.round(count * 0.3), triviaQs.length);
+  const identifyCount = count - triviaCount;
+
+  const selected = [
+    ...identifyQs.slice(0, identifyCount),
+    ...triviaQs.slice(0, triviaCount),
+  ];
+
+  // Mark every 10th question as bonus
+  const shuffled = shuffle(selected);
+  return shuffled.map((q, i) => ({
+    ...q,
+    isBonus: q.isBonus || (i + 1) % 10 === 0,
+  }));
 }

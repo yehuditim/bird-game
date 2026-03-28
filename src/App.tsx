@@ -7,17 +7,26 @@ type Screen = 'start' | 'game';
 
 function App() {
   const [screen, setScreen] = useState<Screen>('start');
+  const [playerName, setPlayerName] = useState('');
+
+  const handleStart = (name: string) => {
+    setPlayerName(name);
+    setScreen('game');
+  };
 
   return (
     <div className="app">
       {screen === 'start' && (
         <StartScreen
           totalBirds={birds.length}
-          onStart={() => setScreen('game')}
+          onStart={handleStart}
         />
       )}
       {screen === 'game' && (
-        <Game onQuit={() => setScreen('start')} />
+        <Game
+          playerName={playerName}
+          onQuit={() => setScreen('start')}
+        />
       )}
     </div>
   );
