@@ -9,10 +9,6 @@ export interface Bird {
   seasonal?: 'winter' | 'summer';
 }
 
-// Special:FilePath redirects reliably to the actual CDN URL — no hash needed
-const fp = (filename: string) =>
-  `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(filename)}`;
-
 export const birds: Bird[] = [
   {
     id: 1,
@@ -20,7 +16,7 @@ export const birds: Bird[] = [
     englishName: 'Common Starling',
     arabicName: 'زرزور',
     size: 'small',
-    imageUrl: fp('Sturnus vulgaris - SE Finland.jpg'),
+    imageUrl: '/birds/pg1_08.jpg',
     funFact: 'הזרזיר מסוגל לחקות קולות של ציפורים אחרות ואף קולות מכניים.',
     seasonal: 'winter',
   },
@@ -30,7 +26,7 @@ export const birds: Bird[] = [
     englishName: 'House Sparrow',
     arabicName: 'دوري البيت',
     size: 'small',
-    imageUrl: fp('House sparrow04.jpg'),
+    imageUrl: '/birds/pg1_03.jpg',
     funFact: 'דרור הבית הוא אחת הציפורים הנפוצות ביותר בעולם — מלווה את האדם אלפי שנים.',
   },
   {
@@ -39,7 +35,7 @@ export const birds: Bird[] = [
     englishName: 'Stonechat',
     arabicName: 'أبلق الحقل',
     size: 'small',
-    imageUrl: fp('Saxicola rubicola male (Marek Szczepanek).jpg'),
+    imageUrl: '/birds/pg1_04.jpg',
     funFact: 'הדוחל מקיש זנבו למעלה-מטה ומשמיע צליל מתכתי כמו אבנים המתנגשות.',
     seasonal: 'winter',
   },
@@ -49,7 +45,7 @@ export const birds: Bird[] = [
     englishName: 'European Robin',
     arabicName: 'أبو الحناء',
     size: 'small',
-    imageUrl: fp('Erithacus rubecula with cocked head.jpg'),
+    imageUrl: '/birds/pg1_02.jpg',
     funFact: 'אדום החזה הוא "ציפורה הלאומית" של בריטניה ושר גם בלילה.',
     seasonal: 'winter',
   },
@@ -59,7 +55,7 @@ export const birds: Bird[] = [
     englishName: 'White-spectacled Bulbul',
     arabicName: 'بلبل',
     size: 'small',
-    imageUrl: fp('White-spectacled Bulbul.jpg'),
+    imageUrl: '/birds/pg1_05.jpg',
     funFact: 'הבולבול אנדמי לאזורנו — ושמו בערבית נקשר לאהבה ושירה בשירה הפרסית.',
   },
   {
@@ -68,7 +64,7 @@ export const birds: Bird[] = [
     englishName: 'Great Tit',
     arabicName: 'قرقف كبير',
     size: 'small',
-    imageUrl: fp('Parus major Rougemont.jpg'),
+    imageUrl: '/birds/pg1_11.jpg',
     funFact: 'הירגזי ניזון מחרקים וזחלים — עוזר מצוין לגינן! מזהים אותו בחזה צהוב ו"עניבה" שחורה.',
   },
   {
@@ -77,7 +73,7 @@ export const birds: Bird[] = [
     englishName: 'Red-rumped Swallow',
     arabicName: 'سنونو أحمر العجز',
     size: 'small',
-    imageUrl: fp('Cecropis daurica.jpg'),
+    imageUrl: '/birds/pg1_19.jpg',
     funFact: 'סנונית המערות בונה קן טיט בצורת בקבוק עם מנהרת כניסה.',
     seasonal: 'summer',
   },
@@ -87,7 +83,7 @@ export const birds: Bird[] = [
     englishName: 'Common Chiffchaff',
     arabicName: 'نقشاره صنابيه',
     size: 'small',
-    imageUrl: fp('Phylloscopus collybita 2.jpg'),
+    imageUrl: '/birds/pg1_17.jpg',
     funFact: 'שמה של העלווית מגיע מקריאתה: "צ\'יף-צ\'אף" — חוזרת שוב ושוב.',
     seasonal: 'winter',
   },
@@ -97,7 +93,7 @@ export const birds: Bird[] = [
     englishName: 'Barn Swallow',
     arabicName: 'سنونو',
     size: 'small',
-    imageUrl: fp('Hirundo rustica - Ratnagiri 1.jpg'),
+    imageUrl: '/birds/pg1_18.jpg',
     funFact: 'הסנונית עוברת כ-10,000 ק"מ בנדידה — מישראל לדרום אפריקה ובחזרה.',
     seasonal: 'summer',
   },
@@ -107,7 +103,7 @@ export const birds: Bird[] = [
     englishName: 'Common Swift',
     arabicName: 'سمامة عاديّة',
     size: 'small',
-    imageUrl: fp('Apus apus 1 (Piotr Kuczynski).jpg'),
+    imageUrl: '/birds/pg1_21.jpg',
     funFact: 'הסיס ישן, אוכל ואפילו מזדווג בעודו עף — הוא כמעט לא נוחת!',
     seasonal: 'summer',
   },
@@ -117,7 +113,7 @@ export const birds: Bird[] = [
     englishName: 'Sardinian Warbler',
     arabicName: 'دخلة رأساء',
     size: 'small',
-    imageUrl: fp('Sylvia melanocephala 1.jpg'),
+    imageUrl: '/birds/pg1_14.jpg',
     funFact: 'לסבכי שחור-הראש עיניים אדומות בולטות — סימן מזהה ייחודי.',
   },
   {
@@ -126,7 +122,7 @@ export const birds: Bird[] = [
     englishName: 'Eurasian Blackcap',
     arabicName: 'أبو قلنسوه',
     size: 'small',
-    imageUrl: fp('Sylvia atricapilla male.jpg'),
+    imageUrl: '/birds/pg1_12.jpg',
     funFact: 'הזכר עם כיפה שחורה, הנקבה עם כיפה חומה — שיר מהיפים בין ציפורי ישראל.',
     seasonal: 'winter',
   },
@@ -136,7 +132,7 @@ export const birds: Bird[] = [
     englishName: 'Common Chaffinch',
     arabicName: 'الصغنج',
     size: 'small',
-    imageUrl: fp('Fringilla coelebs chaffinch male edit2.jpg'),
+    imageUrl: '/birds/pg1_24.jpg',
     funFact: 'הפרוש הוא מהציפורים הנפוצות ביותר באירופה.',
     seasonal: 'winter',
   },
@@ -146,7 +142,7 @@ export const birds: Bird[] = [
     englishName: 'Crested Lark',
     arabicName: 'قبرة متوجة',
     size: 'small',
-    imageUrl: fp('Crested lark arp.jpg'),
+    imageUrl: '/birds/pg1_20.jpg',
     funFact: 'העפרוני מצויץ נקרא כך בגלל הציצית הגדולה על ראשו — ושר בטיסה.',
   },
   {
@@ -155,7 +151,7 @@ export const birds: Bird[] = [
     englishName: 'Palestine Sunbird',
     arabicName: 'أبو الزهر',
     size: 'small',
-    imageUrl: fp('Palestine sunbird male Ashdod crop.jpg'),
+    imageUrl: '/birds/pg1_26.jpg',
     funFact: 'הצופית מרחפת מול פרחים ושואבת צוף — כמו דבורת הציפורים!',
   },
   {
@@ -164,7 +160,7 @@ export const birds: Bird[] = [
     englishName: 'Graceful Prinia',
     arabicName: 'فسيسي',
     size: 'small',
-    imageUrl: fp('Prinia gracilis 2.jpg'),
+    imageUrl: '/birds/pg1_25.jpg',
     funFact: 'הפשוש בונה קן סגור בצורת אגס — בדרך כלל בנקודה הגבוהה ביותר של השיח.',
   },
   {
@@ -173,7 +169,7 @@ export const birds: Bird[] = [
     englishName: 'Black Redstart',
     arabicName: 'حميراء سوداء',
     size: 'small',
-    imageUrl: fp('Phoenicurus ochruros male.jpg'),
+    imageUrl: '/birds/pg1_09.jpg',
     funFact: 'החכלילית רוטטת את זנבה האדמדם ללא הרף — תנועה אופיינית לה.',
     seasonal: 'winter',
   },
@@ -183,7 +179,7 @@ export const birds: Bird[] = [
     englishName: 'White Wagtail',
     arabicName: 'كركس',
     size: 'small',
-    imageUrl: fp('White wagtail.jpg'),
+    imageUrl: '/birds/pg1_15.jpg',
     funFact: 'הנחליאלי מנענע זנבו למעלה-מטה ללא הפסקה — סמל החורף בישראל.',
     seasonal: 'winter',
   },
@@ -193,7 +189,7 @@ export const birds: Bird[] = [
     englishName: 'European Greenfinch',
     arabicName: 'خضيري',
     size: 'small',
-    imageUrl: fp('Chloris chloris qtl1.jpg'),
+    imageUrl: '/birds/pg1_13.jpg',
     funFact: 'לירקון מקור עבה וחזק השובר גרעינים — מסוגל לאכול זרעים שציפורים אחרות מוותרות עליהם.',
   },
   {
@@ -202,7 +198,7 @@ export const birds: Bird[] = [
     englishName: 'European Goldfinch',
     arabicName: 'حسون',
     size: 'small',
-    imageUrl: fp('Carduelis carduelis close up.jpg'),
+    imageUrl: '/birds/pg1_07.jpg',
     funFact: 'לחוחית פנים אדומות כמו "מסכה" — ונוהגים לצוד אותה כציפור שירה, מה שאיים על אוכלוסייתה.',
   },
 
@@ -213,7 +209,7 @@ export const birds: Bird[] = [
     englishName: 'Eurasian Hoopoe',
     arabicName: 'هدهد',
     size: 'medium',
-    imageUrl: fp('Upupa epops - Hoopoe XL.jpg'),
+    imageUrl: '/birds/pg2_04.jpg',
     funFact: 'הדוכיפת היא ציפור המדינה של ישראל! נבחרה ב-2008 בהצבעה ציבורית.',
   },
   {
@@ -222,7 +218,7 @@ export const birds: Bird[] = [
     englishName: 'Common Myna',
     arabicName: 'مايْنا',
     size: 'medium',
-    imageUrl: fp('Common myna.jpg'),
+    imageUrl: '/birds/pg2_01.jpg',
     funFact: 'המאינה הגיעה לישראל מדרום אסיה ויכולה לחקות דיבור אנושי!',
   },
   {
@@ -231,7 +227,7 @@ export const birds: Bird[] = [
     englishName: 'Common Kestrel',
     arabicName: 'عوسق',
     size: 'medium',
-    imageUrl: fp('Falco tinnunculus - 01.jpg'),
+    imageUrl: '/birds/pg2_02.jpg',
     funFact: 'הבז "תולה" עצמו באוויר מול הרוח ועיניו רואות עכברים ממרחק של 50 מטר!',
   },
   {
@@ -240,7 +236,7 @@ export const birds: Bird[] = [
     englishName: 'Eurasian Jay',
     arabicName: 'ابو زريق',
     size: 'medium',
-    imageUrl: fp('Garrulus glandarius anglicanus edit2.jpg'),
+    imageUrl: '/birds/pg2_08.jpg',
     funFact: 'העורבני מסתיר אלפי בלוטים בחורף — ומוצא רוב מחבואיו חודשים מאוחר יותר.',
   },
   {
@@ -249,7 +245,7 @@ export const birds: Bird[] = [
     englishName: 'European Turtle Dove',
     arabicName: 'دبسيه',
     size: 'medium',
-    imageUrl: fp('Streptopelia turtur - Barbate.jpg'),
+    imageUrl: '/birds/pg2_14.jpg',
     funFact: 'התור מוזכר בשיר השירים: "וקול התור נשמע בארצנו" — סמל האביב.',
     seasonal: 'summer',
   },
@@ -259,7 +255,7 @@ export const birds: Bird[] = [
     englishName: 'Laughing Dove',
     arabicName: 'قمري',
     size: 'medium',
-    imageUrl: fp('Spilopelia senegalensis.jpg'),
+    imageUrl: '/birds/pg2_15.jpg',
     funFact: 'שירת הצוצלת נשמעת כמו צחוק — מכאן שמה באנגלית Laughing Dove.',
   },
   {
@@ -268,7 +264,7 @@ export const birds: Bird[] = [
     englishName: 'Common Blackbird',
     arabicName: 'شحرور',
     size: 'medium',
-    imageUrl: fp('Common blackbird.jpg'),
+    imageUrl: '/birds/pg2_09.jpg',
     funFact: 'השחרור הוא ממצטייני השירה — שיר עשיר ומגוון, ניתן לשמוע אותו גם בדמדומים.',
   },
   {
@@ -277,7 +273,7 @@ export const birds: Bird[] = [
     englishName: 'Spur-winged Lapwing',
     arabicName: 'زقزاق',
     size: 'medium',
-    imageUrl: fp('Vanellus spinosus.jpg'),
+    imageUrl: '/birds/pg2_10.jpg',
     funFact: 'הסיקסק מגן על קינו בתוקפנות קיצונית — יתקוף אפילו בני אדם!',
   },
   {
@@ -286,7 +282,7 @@ export const birds: Bird[] = [
     englishName: 'Feral Pigeon',
     arabicName: 'حمام طوراني',
     size: 'medium',
-    imageUrl: fp('Rock dove Columba livia.jpg'),
+    imageUrl: '/birds/pg2_12.jpg',
     funFact: 'היונה שימשה כ"דואר" לאורך ההיסטוריה — יכולת הניווט שלה מדהימה.',
   },
   {
@@ -295,7 +291,7 @@ export const birds: Bird[] = [
     englishName: 'Eurasian Collared Dove',
     arabicName: 'حمام رقطي',
     size: 'medium',
-    imageUrl: fp('Streptopelia decaocto.jpg'),
+    imageUrl: '/birds/pg2_11.jpg',
     funFact: 'תור הצווארון הגיע לישראל ואירופה רק במאה ה-20, ומאז התפשט מהר מאוד.',
   },
   {
@@ -304,7 +300,7 @@ export const birds: Bird[] = [
     englishName: 'Hooded Crow',
     arabicName: 'غراب الزرع',
     size: 'large',
-    imageUrl: fp('Corvus cornix cornix edit.jpg'),
+    imageUrl: '/birds/pg2_19.jpg',
     funFact: 'העורב האפור הוא מהחכמות בין הציפורים — מסוגל לפתור בעיות מורכבות.',
   },
   {
@@ -313,7 +309,7 @@ export const birds: Bird[] = [
     englishName: 'Eurasian Stone Curlew',
     arabicName: 'الكروان',
     size: 'medium',
-    imageUrl: fp('Burhinus oedicnemus.jpg'),
+    imageUrl: '/birds/pg2_17.jpg',
     funFact: 'הכרוון פעיל בעיקר בלילה — עיניו הצהובות הגדולות מותאמות לראייה בחשיכה.',
   },
   {
@@ -322,7 +318,7 @@ export const birds: Bird[] = [
     englishName: 'Chukar Partridge',
     arabicName: 'حجل',
     size: 'medium',
-    imageUrl: fp('Alectoris chukar crop.jpg'),
+    imageUrl: '/birds/pg2_20.jpg',
     funFact: 'קריאת החוגלה "צ\'וקאר!" היא שמה — ציפור ציד מוערכת ברחבי העולם.',
   },
   {
@@ -331,7 +327,7 @@ export const birds: Bird[] = [
     englishName: 'Western Jackdaw',
     arabicName: 'غراب صغير',
     size: 'medium',
-    imageUrl: fp('Western jackdaw.jpg'),
+    imageUrl: '/birds/pg2_18.jpg',
     funFact: 'הקאק הוא מהקטנים במשפחת העורבים — ועיניו האפורות-כחולות ייחודיות לו.',
   },
   {
@@ -340,7 +336,7 @@ export const birds: Bird[] = [
     englishName: 'Syrian Woodpecker',
     arabicName: 'نقار خشب',
     size: 'medium',
-    imageUrl: fp('Dendrocopos syriacus LC0191.jpg'),
+    imageUrl: '/birds/pg2_07.jpg',
     funFact: 'הנקר מסוגל לנקר 20 פעמים בשנייה — גולגולתו מוגנת מהרעידות.',
   },
   {
@@ -349,7 +345,7 @@ export const birds: Bird[] = [
     englishName: 'Rose-ringed Parakeet',
     arabicName: 'ببغاء الراهب',
     size: 'medium',
-    imageUrl: fp('Psittacula krameri -near Palm Beach, Florida, USA-8.jpg'),
+    imageUrl: '/birds/pg2_05.jpg',
     funFact: 'הדררה ציפור פולשת — ברחה מכלובים והפכה לבעיה חקלאית.',
   },
   {
@@ -358,7 +354,7 @@ export const birds: Bird[] = [
     englishName: 'Monk Parakeet',
     arabicName: 'دُرّة',
     size: 'medium',
-    imageUrl: fp('Monk parakeet (Myiopsitta monachus).jpg'),
+    imageUrl: '/birds/pg2_03.jpg',
     funFact: 'התוכי הנזירי בונה קנים ענקיים מענפים — עשרות זוגות יכולים לגור יחד!',
   },
   {
@@ -367,7 +363,7 @@ export const birds: Bird[] = [
     englishName: 'Western Cattle Egret',
     arabicName: 'أبو قردان',
     size: 'medium',
-    imageUrl: fp('Bubulcus ibis cowherd.jpg'),
+    imageUrl: '/birds/pg2_16.jpg',
     funFact: 'אנפית הבקר עוקבת אחרי עדרים ולוכדת חרקים שהם מפריחים — שותפות מועילה.',
   },
   {
@@ -376,7 +372,7 @@ export const birds: Bird[] = [
     englishName: 'European Bee-eater',
     arabicName: 'وروار أوروبي',
     size: 'medium',
-    imageUrl: fp('Merops apiaster perching.jpg'),
+    imageUrl: '/birds/pg2_13.jpg',
     funFact: 'השרקרק מסיר את עוקץ הדבורה לפני בליעה — על ידי הכאה בענף!',
     seasonal: 'summer',
   },
@@ -386,7 +382,7 @@ export const birds: Bird[] = [
     englishName: 'White-throated Kingfisher',
     arabicName: 'سماك أبيض الصدر',
     size: 'medium',
-    imageUrl: fp('Halcyon smyrnensis 2.jpg'),
+    imageUrl: '/birds/pg2_06.jpg',
     funFact: 'שלדג לבן-החזה לא רק דג — הוא גם ציד לטאות, חרקים וצפרדעים.',
   },
 ];
