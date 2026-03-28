@@ -1,38 +1,19 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Bird, birds } from '../data/birds';
+import { GameQuestion, pickQuestions } from '../data/questions';
 import { ResultScreen } from './ResultScreen';
+import { playCorrect, playWrong } from '../utils/sounds';
+import { Bird } from '../data/birds';
 
-const QUESTIONS_PER_ROUND = 10;
-const OPTIONS_COUNT = 4;
-
-function shuffle<T>(arr: T[]): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-function getOptions(correct: Bird, all: Bird[]): string[] {
-  const others = shuffle(all.filter((b) => b.id !== correct.id))
-    .slice(0, OPTIONS_COUNT - 1)
-    .map((b) => b.hebrewName);
-  return shuffle([correct.hebrewName, ...others]);
-}
+const TOTAL_QUESTIONS = 40;
 
 type AnswerState = 'unanswered' | 'correct' | 'wrong';
-
-interface WrongEntry { bird: Bird; chosen: string; }
+interface WrongEntry { bird?: Bird; birdName: string; chosen: string; imageUrl?: string; }
 
 interface GameProps { onQuit: () => void; }
 
 export function Game({ onQuit }: GameProps) {
-  const [questions] = useState<Bird[]>(() =>
-    shuffle(birds).slice(0, QUESTIONS_PER_ROUND)
-  );
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [options, setOptions] = useState<string[]>([]);
+  const [questions] = useState<GameQuestion[]>(() => pickQuestions(TOTAL_QUESTIONS));
+  const [idx, setIdx] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [answerState, setAnswerState] = useState<AnswerState>('unanswered');
   const [score, setScore] = useState(0);
@@ -42,47 +23,49 @@ export function Game({ onQuit }: GameProps) {
   const [results, setResults] = useState<('correct' | 'wrong')[]>([]);
   const [finished, setFinished] = useState(false);
 
-  const current = questions[currentIndex];
+  const q = questions[idx];
 
   useEffect(() => {
-    if (!current) return;
-    setOptions(getOptions(current, birds));
     setSelected(null);
     setAnswerState('unanswered');
     setImgLoaded(false);
     setImgError(false);
-  }, [currentIndex, current]);
+  }, [idx]);
 
   const handleAnswer = useCallback(
-    (option: string) => {
+    (opt: string) => {
       if (answerState !== 'unanswered') return;
-      setSelected(option);
-      const isCorrect = option === current.hebrewName;
-      setAnswerState(isCorrect ? 'correct' : 'wrong');
-      if (isCorrect) {
-        setScore((s) => s + 1);
-        setResults((r) => [...r, 'correct']);
+      setSelected(opt);
+      const correct = opt === q.answer;
+      setAnswerState(correct ? 'correct' : 'wrong');
+      if (correct) {
+        setScore(s => s + 1);
+        setResults(r => [...r, 'correct']);
+        playCorrect();
       } else {
-        setWrongAnswers((w) => [...w, { bird: current, chosen: option }]);
-        setResults((r) => [...r, 'wrong']);
+        setResults(r => [...r, 'wrong']);
+        setWrongAnswers(w => [...w, {
+          bird: q.bird,
+          birdName: q.answer,
+          chosen: opt,
+          imageUrl: q.imageUrl,
+        }]);
+        playWrong();
       }
     },
-    [answerState, current]
+    [answerState, q]
   );
 
   const handleNext = useCallback(() => {
-    if (currentIndex + 1 >= QUESTIONS_PER_ROUND) {
-      setFinished(true);
-    } else {
-      setCurrentIndex((i) => i + 1);
-    }
-  }, [currentIndex]);
+    if (idx + 1 >= TOTAL_QUESTIONS) setFinished(true);
+    else setIdx(i => i + 1);
+  }, [idx]);
 
   if (finished) {
     return (
       <ResultScreen
         score={score}
-        total={QUESTIONS_PER_ROUND}
+        total={TOTAL_QUESTIONS}
         wrongAnswers={wrongAnswers}
         onRestart={() => window.location.reload()}
       />
@@ -91,75 +74,77 @@ export function Game({ onQuit }: GameProps) {
 
   const optClass = (opt: string) => {
     if (answerState === 'unanswered') return 'opt-btn';
-    if (opt === current.hebrewName) return 'opt-btn state-correct';
-    if (opt === selected)            return 'opt-btn state-wrong';
+    if (opt === q.answer) return 'opt-btn state-correct';
+    if (opt === selected)  return 'opt-btn state-wrong';
     return 'opt-btn state-dim';
   };
 
+  const isIdentify = q.type === 'identify';
+
   return (
     <div className="game-screen">
-      {/* ── Header ── */}
+      {/* Header */}
       <header className="game-header">
         <button className="quit-btn" onClick={onQuit}>← יציאה</button>
-
         <div className="progress-dots">
-          {Array.from({ length: QUESTIONS_PER_ROUND }, (_, i) => {
+          {Array.from({ length: TOTAL_QUESTIONS }, (_, i) => {
             let cls = 'dot';
             if (i < results.length) cls = `dot answered-${results[i]}`;
-            else if (i === currentIndex) cls = 'dot current';
+            else if (i === idx) cls = 'dot current';
             return <span key={i} className={cls} />;
           })}
         </div>
-
         <div className="score-chip">⭐ {score}</div>
       </header>
 
-      {/* ── Bird image ── */}
-      <div className="bird-image-wrap">
-        {/* blurred background */}
-        {imgLoaded && (
-          <div
-            className="bird-image-blur"
-            style={{ backgroundImage: `url(${current.imageUrl})` }}
+      {/* Bird image — only for identify questions */}
+      {isIdentify && q.imageUrl && (
+        <div className="bird-image-wrap">
+          {imgLoaded && (
+            <div className="bird-image-blur" style={{ backgroundImage: `url(${q.imageUrl})` }} />
+          )}
+          {!imgLoaded && !imgError && (
+            <div className="bird-img-skeleton">
+              <span className="spin-icon">⏳</span>
+              <span>טוען תמונה...</span>
+            </div>
+          )}
+          {imgError && (
+            <div className="bird-img-skeleton">
+              <span style={{ fontSize: '2.5rem' }}>🐦</span>
+              <span>תמונה לא זמינה</span>
+            </div>
+          )}
+          <img
+            key={q.id}
+            src={q.imageUrl}
+            alt="ציפור לזיהוי"
+            className={`bird-img ${imgLoaded ? 'loaded' : 'loading'}`}
+            onLoad={() => setImgLoaded(true)}
+            onError={() => { setImgError(true); setImgLoaded(false); }}
           />
-        )}
+          {q.bird?.seasonal && (
+            <div className="seasonal-tag">
+              {q.bird.seasonal === 'winter' ? '❄️ חורפת' : '☀️ מקייצת'}
+            </div>
+          )}
+        </div>
+      )}
 
-        {/* skeleton */}
-        {!imgLoaded && !imgError && (
-          <div className="bird-img-skeleton">
-            <span className="spin-icon">⏳</span>
-            <span>טוען תמונה...</span>
-          </div>
-        )}
-        {imgError && (
-          <div className="bird-img-skeleton">
-            <span style={{ fontSize: '2.5rem' }}>🐦</span>
-            <span>תמונה לא זמינה</span>
-          </div>
-        )}
+      {/* Trivia banner */}
+      {!isIdentify && (
+        <div className="trivia-banner">
+          <span className="trivia-icon">🧠</span>
+          <span className="trivia-label">שאלת ידע</span>
+        </div>
+      )}
 
-        <img
-          key={current.id}
-          src={current.imageUrl}
-          alt="ציפור לזיהוי"
-          className={`bird-img ${imgLoaded ? 'loaded' : 'loading'}`}
-          onLoad={() => setImgLoaded(true)}
-          onError={() => { setImgError(true); setImgLoaded(false); }}
-        />
-
-        {current.seasonal && (
-          <div className="seasonal-tag">
-            {current.seasonal === 'winter' ? '❄️ חורפת' : '☀️ מקייצת'}
-          </div>
-        )}
-      </div>
-
-      {/* ── Body ── */}
+      {/* Body */}
       <div className="game-body">
-        <p className="question-label">מה שם הציפור הזו?</p>
+        <p className="question-label">{q.questionText}</p>
 
         <div className="options-grid">
-          {options.map((opt) => (
+          {q.options.map(opt => (
             <button
               key={opt}
               className={optClass(opt)}
@@ -171,23 +156,28 @@ export function Game({ onQuit }: GameProps) {
           ))}
         </div>
 
+        {/* Feedback */}
         {answerState !== 'unanswered' && (
           <div className={`feedback-panel ${answerState}`}>
             <div className="feedback-verdict">
               {answerState === 'correct' ? '✅ נכון!' : '❌ לא נכון'}
             </div>
-
             <div className="feedback-names">
-              <div className="feedback-he">{current.hebrewName}</div>
-              <div className="feedback-en">{current.englishName}</div>
+              <div className="feedback-he">{q.answer}</div>
+              {q.bird && <div className="feedback-en">{q.bird.englishName}</div>}
             </div>
-
-            <div className="feedback-fact">💡 {current.funFact}</div>
-
+            <div className="feedback-fact">💡 {q.explanation}</div>
             <button className="next-btn" onClick={handleNext}>
-              {currentIndex + 1 >= QUESTIONS_PER_ROUND ? '🏁 סיום המשחק' : 'הבא ←'}
+              {idx + 1 >= TOTAL_QUESTIONS ? '🏁 סיום המשחק' : 'הבא ←'}
             </button>
           </div>
+        )}
+
+        {/* Skip button — visible before answering */}
+        {answerState === 'unanswered' && (
+          <button className="skip-btn" onClick={handleNext}>
+            דלג ←
+          </button>
         )}
       </div>
     </div>

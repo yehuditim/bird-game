@@ -1,10 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
-import { Bird } from '../data/birds';
+
+interface WrongEntry {
+  birdName: string;
+  chosen: string;
+  imageUrl?: string;
+}
 
 interface ResultScreenProps {
   score: number;
   total: number;
-  wrongAnswers: { bird: Bird; chosen: string }[];
+  wrongAnswers: WrongEntry[];
   onRestart: () => void;
 }
 
@@ -40,15 +45,12 @@ export function ResultScreen({ score, total, wrongAnswers, onRestart }: ResultSc
   return (
     <div className="result-screen">
       <div className="result-card">
-
-        {/* Banner */}
         <div className="result-banner">
           <div className="result-trophy">{trophy}</div>
           <h2>{headline}</h2>
           <p className="result-tagline">{tagline}</p>
         </div>
 
-        {/* Score */}
         <div className="result-score-section">
           <div className="score-fraction">
             <span className="score-num">{score}</span>
@@ -61,23 +63,25 @@ export function ResultScreen({ score, total, wrongAnswers, onRestart }: ResultSc
           </div>
         </div>
 
-        {/* Wrong answers review */}
         {wrongAnswers.length > 0 && (
           <div className="wrong-section">
             <div className="wrong-section-title">שגיאות לסקירה</div>
             <div className="wrong-list">
-              {wrongAnswers.map(({ bird, chosen }) => (
-                <div key={bird.id} className="wrong-row">
-                  <img
-                    src={bird.imageUrl}
-                    alt={bird.hebrewName}
-                    className="wrong-thumb"
-                    onError={(e) => { (e.target as HTMLImageElement).style.opacity = '0'; }}
-                  />
+              {wrongAnswers.map((w, i) => (
+                <div key={i} className="wrong-row">
+                  {w.imageUrl ? (
+                    <img
+                      src={w.imageUrl}
+                      alt={w.birdName}
+                      className="wrong-thumb"
+                      onError={e => { (e.target as HTMLImageElement).style.visibility = 'hidden'; }}
+                    />
+                  ) : (
+                    <div className="wrong-thumb-placeholder">🧠</div>
+                  )}
                   <div className="wrong-details">
-                    <div className="wrong-correct-name">✅ {bird.hebrewName}</div>
-                    <div className="wrong-chosen-name">❌ {chosen}</div>
-                    <div className="wrong-en">{bird.englishName}</div>
+                    <div className="wrong-correct-name">✅ {w.birdName}</div>
+                    <div className="wrong-chosen-name">❌ {w.chosen}</div>
                   </div>
                 </div>
               ))}
@@ -85,13 +89,9 @@ export function ResultScreen({ score, total, wrongAnswers, onRestart }: ResultSc
           </div>
         )}
 
-        {/* Actions */}
         <div className="result-actions">
-          <button className="btn-primary" onClick={onRestart}>
-            🔄 שחקי שוב
-          </button>
+          <button className="btn-primary" onClick={onRestart}>🔄 שחקי שוב</button>
         </div>
-
       </div>
     </div>
   );

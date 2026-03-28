@@ -339,6 +339,21 @@ body {
   width: 100%;
 }
 
+/* ---- Trivia banner ---- */
+.trivia-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #1e3a5f, #0c2640);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  padding: 14px 16px;
+  flex-shrink: 0;
+}
+
+.trivia-icon { font-size: 1.4rem; }
+.trivia-label { font-size: 0.85rem; font-weight: 700; color: var(--amber); letter-spacing: 1px; text-transform: uppercase; }
+
 .question-label {
   font-size: 1.05rem;
   font-weight: 700;
@@ -346,6 +361,20 @@ body {
   text-align: center;
   letter-spacing: 0.2px;
 }
+
+/* ---- Skip button ---- */
+.skip-btn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.45);
+  border-radius: 50px;
+  padding: 8px 20px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.skip-btn:hover { color: rgba(255,255,255,0.75); border-color: rgba(255,255,255,0.4); }
 
 /* ---- Options ---- */
 .options-grid {
@@ -641,6 +670,18 @@ body {
   object-fit: cover;
   flex-shrink: 0;
   background: #e5e7eb;
+}
+
+.wrong-thumb-placeholder {
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  flex-shrink: 0;
 }
 
 .wrong-details { text-align: right; flex: 1; display: flex; flex-direction: column; gap: 3px; }
