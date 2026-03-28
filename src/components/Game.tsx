@@ -2,12 +2,10 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { GameQuestion, pickQuestions } from '../data/questions';
 import { ResultScreen } from './ResultScreen';
 import { playCorrect, playWrong } from '../utils/sounds';
+import { AgeMode, AGE_CONFIG } from '../types/ageMode';
 
-const TOTAL_QUESTIONS  = 40;
-const TIMER_SECONDS    = 20;
 const BASE_POINTS      = 10;
 const SPEED_BONUS      = 5;
-const INITIAL_LIVES    = 3;
 
 interface QuestionRecord {
   selected: string | null;
@@ -18,6 +16,7 @@ interface QuestionRecord {
 
 interface GameProps {
   playerName: string;
+  ageMode: AgeMode;
   onQuit: () => void;
 }
 
@@ -28,8 +27,12 @@ function streakMult(s: number): number {
   return s >= 8 ? 3 : s >= 5 ? 2 : s >= 3 ? 1.5 : 1;
 }
 
-export function Game({ playerName, onQuit }: GameProps) {
-  const [questions]    = useState<GameQuestion[]>(() => pickQuestions(TOTAL_QUESTIONS));
+export function Game({ playerName, ageMode, onQuit }: GameProps) {
+  const cfg = AGE_CONFIG[ageMode];
+  const TOTAL_QUESTIONS = cfg.totalQuestions;
+  const TIMER_SECONDS   = cfg.timerSeconds;
+
+  const [questions]    = useState<GameQuestion[]>(() => pickQuestions(TOTAL_QUESTIONS, ageMode));
   const [records, setRecords] = useState<(QuestionRecord | null)[]>(
     () => Array(TOTAL_QUESTIONS).fill(null)
   );
@@ -37,7 +40,7 @@ export function Game({ playerName, onQuit }: GameProps) {
   const [viewIdx, setViewIdx] = useState(0);   // displayed question
   const [maxIdx,  setMaxIdx]  = useState(0);   // furthest reached
 
-  const [lives,       setLives]       = useState(INITIAL_LIVES);
+  const [lives,       setLives]       = useState(cfg.maxLives);
   const [totalScore,  setTotalScore]  = useState(0);
   const [correctCount,setCorrectCount]= useState(0);
   const [streak,      setStreak]      = useState(0);
@@ -56,14 +59,14 @@ export function Game({ playerName, onQuit }: GameProps) {
   const maxRecord  = records[maxIdx];
   const isCurrentQ = viewIdx === maxIdx;
   const isAnswered = record !== null;
-  const isBonusQ   = !!q.isBonus;
+  const isBonusQ   = cfg.enableBonus && !!q.isBonus;
   const hasImages  = !!q.optionImages;
 
   // ── Timer ─────────────────────────────────────────────────────────────────
   useEffect(() => {
     maxIdxRef.current = maxIdx;
     setTimeLeft(TIMER_SECONDS);
-  }, [maxIdx]);
+  }, [maxIdx, TIMER_SECONDS]);
 
   useEffect(() => {
     if (!isCurrentQ || maxRecord !== null || finished) return;
@@ -110,11 +113,11 @@ export function Game({ playerName, onQuit }: GameProps) {
     if (timerRef.current) clearTimeout(timerRef.current);
 
     const correct = opt === q.answer;
-    const currentMult = streakMult(streak);   // multiplier earned by existing streak
+    const currentMult = cfg.showStreak ? streakMult(streak) : 1;
     let points = 0;
 
     if (correct) {
-      const speedBonus = Math.round((timeLeft / TIMER_SECONDS) * SPEED_BONUS);
+      const speedBonus = cfg.showTimer ? Math.round((timeLeft / TIMER_SECONDS) * SPEED_BONUS) : 0;
       points = Math.round((BASE_POINTS + speedBonus) * currentMult * (isBonusQ ? 2 : 1));
       setTotalScore(s => s + points);
       setCorrectCount(c => c + 1);
@@ -225,7 +228,7 @@ export function Game({ playerName, onQuit }: GameProps) {
     streak >= 3 ? `🔥${streak} ×1.5` : null;
 
   return (
-    <div className={`game-screen${isBonusQ && !isAnswered ? ' bonus-active' : ''}`}>
+    <div className={`game-screen${isBonusQ && !isAnswered ? ' bonus-active' : ''}${cfg.fontSize === 'large' ? ' mode-young' : ''}`}>
 
       {/* Screen flash overlay */}
       {flashState && <div className={`screen-flash screen-flash-${flashState}`} />}
@@ -257,12 +260,12 @@ export function Game({ playerName, onQuit }: GameProps) {
 
         <div className="header-right">
           <div className="lives-row">
-            {Array.from({ length: INITIAL_LIVES }, (_, i) => (
+            {Array.from({ length: cfg.maxLives }, (_, i) => (
               <span key={i} className={`life-icon ${i < lives ? 'alive' : 'dead'}`}>❤️</span>
             ))}
           </div>
           <div className="header-scores">
-            {streakLabel && (
+            {cfg.showStreak && streakLabel && (
               <div className={`streak-chip ${streak >= 8 ? 'streak-max' : streak >= 5 ? 'streak-high' : ''}`}>
                 {streakLabel}
               </div>
@@ -272,8 +275,8 @@ export function Game({ playerName, onQuit }: GameProps) {
         </div>
       </header>
 
-      {/* ── Timer bar (current unanswered only) ── */}
-      {isCurrentQ && !isAnswered && (
+      {/* ── Timer bar (current unanswered only, if mode shows timer) ── */}
+      {cfg.showTimer && isCurrentQ && !isAnswered && (
         <div className="timer-bar-wrap">
           <div
             className="timer-bar"

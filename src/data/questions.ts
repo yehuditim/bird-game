@@ -1,4 +1,5 @@
 import { birds, Bird } from './birds';
+import { AgeMode, AGE_CONFIG } from '../types/ageMode';
 
 export interface GameQuestion {
   id: string;
@@ -511,25 +512,52 @@ function buildTriviaData(): Omit<GameQuestion, 'id'>[] { return [
 
 // ─── PICK QUESTIONS ───────────────────────────────────────────────────────────
 
-/** Pick `count` questions: ~27 identify + 7 trivia + 6 compare (visual) */
-export function pickQuestions(count: number): GameQuestion[] {
-  const identifyQs  = shuffle(buildIdentifyQuestions());
-  const triviaQs    = shuffle(buildTriviaData().map((q, i) => ({ ...q, id: `trivia-${i}` })));
-  const compareQs   = shuffle(buildCompareQuestions());
+/** Pick questions appropriate for the given age mode */
+export function pickQuestions(count: number, mode: AgeMode = '12-15'): GameQuestion[] {
+  const cfg = AGE_CONFIG[mode];
+  const types = cfg.questionTypes;
 
-  const compareCount  = Math.min(6, compareQs.length);
-  const triviaCount   = Math.min(7, triviaQs.length);
-  const identifyCount = count - triviaCount - compareCount;
+  const identifyQs = shuffle(buildIdentifyQuestions());
+  const allTrivia  = shuffle(buildTriviaData().map((q, i) => ({ ...q, id: `trivia-${i}` })));
+  const allCompare = shuffle(buildCompareQuestions());
 
-  const selected = [
-    ...identifyQs.slice(0, identifyCount),
-    ...triviaQs.slice(0, triviaCount),
-    ...compareQs.slice(0, compareCount),
-  ];
+  // Build pool based on allowed types
+  let pool: GameQuestion[] = [];
 
-  // Mark every 10th question as bonus (on top of any already-flagged ones)
-  return shuffle(selected).map((q, i) => ({
+  if (types.includes('identify')) {
+    const identifyCount = types.length === 1
+      ? count
+      : count - (types.includes('trivia') ? Math.min(7, allTrivia.length) : 0)
+               - (types.includes('compare') ? Math.min(6, allCompare.length) : 0);
+    pool.push(...identifyQs.slice(0, Math.max(0, identifyCount)));
+  }
+  if (types.includes('trivia')) {
+    pool.push(...allTrivia.slice(0, Math.min(7, allTrivia.length)));
+  }
+  if (types.includes('compare')) {
+    pool.push(...allCompare.slice(0, Math.min(6, allCompare.length)));
+  }
+
+  // For 2-option mode, trim each question to 2 choices
+  if (cfg.optionCount === 2) {
+    pool = pool.map(q => {
+      const answerIdx = q.options.indexOf(q.answer);
+      // Keep the answer + one random distractor
+      const distractors = q.options.filter((_, i) => i !== answerIdx);
+      const distractor = distractors[Math.floor(Math.random() * distractors.length)];
+      const twoOpts = shuffle([q.answer, distractor]);
+      const twoOptImages = q.optionImages
+        ? Object.fromEntries(twoOpts.filter(o => q.optionImages![o]).map(o => [o, q.optionImages![o]]))
+        : undefined;
+      return { ...q, options: twoOpts, optionImages: twoOptImages };
+    });
+  }
+
+  const selected = shuffle(pool).slice(0, count);
+
+  // Mark every 10th question as bonus if mode supports it
+  return selected.map((q, i) => ({
     ...q,
-    isBonus: q.isBonus || (i + 1) % 10 === 0,
+    isBonus: cfg.enableBonus && (q.isBonus || (i + 1) % 10 === 0),
   }));
 }
