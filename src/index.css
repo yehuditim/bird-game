@@ -1136,6 +1136,10 @@ body {
   font-weight: 700;
   text-align: right;
   line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 

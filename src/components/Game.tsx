@@ -13,6 +13,7 @@ interface QuestionRecord {
   selected: string | null;
   timedOut: boolean;
   pointsEarned: number;
+  streakAtAnswer: number;   // streak value BEFORE this answer — determines displayed multiplier
 }
 
 interface GameProps {
@@ -56,7 +57,6 @@ export function Game({ playerName, onQuit }: GameProps) {
   const isCurrentQ = viewIdx === maxIdx;
   const isAnswered = record !== null;
   const isBonusQ   = !!q.isBonus;
-  const mult       = streakMult(streak);
   const hasImages  = !!q.optionImages;
 
   // ── Timer ─────────────────────────────────────────────────────────────────
@@ -78,7 +78,7 @@ export function Game({ playerName, onQuit }: GameProps) {
     setRecords(prev => {
       if (prev[idx] !== null) return prev;
       const next = [...prev];
-      next[idx] = { selected: null, timedOut: true, pointsEarned: 0 };
+      next[idx] = { selected: null, timedOut: true, pointsEarned: 0, streakAtAnswer: 0 };
       return next;
     });
     setStreak(0);
@@ -135,7 +135,7 @@ export function Game({ playerName, onQuit }: GameProps) {
 
     setRecords(prev => {
       const next = [...prev];
-      next[maxIdx] = { selected: opt, timedOut: false, pointsEarned: points };
+      next[maxIdx] = { selected: opt, timedOut: false, pointsEarned: points, streakAtAnswer: streak };
       return next;
     });
   }, [isCurrentQ, maxRecord, q, timeLeft, isBonusQ, maxIdx, streak]);
@@ -165,7 +165,7 @@ export function Game({ playerName, onQuit }: GameProps) {
     setRecords(prev => {
       const next = [...prev];
       if (next[maxIdx] === null)
-        next[maxIdx] = { selected: null, timedOut: false, pointsEarned: 0 };
+        next[maxIdx] = { selected: null, timedOut: false, pointsEarned: 0, streakAtAnswer: 0 };
       return next;
     });
     if (maxIdx + 1 >= TOTAL_QUESTIONS) {
@@ -395,7 +395,7 @@ export function Game({ playerName, onQuit }: GameProps) {
               {record!.timedOut
                 ? '⏰ פג הזמן!'
                 : answerState === 'correct'
-                  ? `✅ נכון! +${record!.pointsEarned}${isBonusQ ? ' 🌟' : ''}${mult > 1 ? ` 🔥×${mult}` : ''}`
+                  ? `✅ נכון! +${record!.pointsEarned}${isBonusQ ? ' 🌟' : ''}${streakMult(record!.streakAtAnswer) > 1 ? ` 🔥×${streakMult(record!.streakAtAnswer)}` : ''}`
                   : '❌ לא נכון'}
             </div>
             <div className="feedback-names">
@@ -430,9 +430,11 @@ export function Game({ playerName, onQuit }: GameProps) {
             <button className="back-btn" onClick={goBack} disabled={viewIdx === 0}>
               ← קודמת
             </button>
-            <button className="next-btn-sm" onClick={goNext}>
-              {viewIdx < maxIdx ? 'הבאה ←' : 'לשאלה הנוכחית ←'}
-            </button>
+            {!isAnswered && (
+              <button className="next-btn-sm" onClick={goNext}>
+                {viewIdx < maxIdx ? 'הבאה ←' : 'לשאלה הנוכחית ←'}
+              </button>
+            )}
           </div>
         )}
       </div>

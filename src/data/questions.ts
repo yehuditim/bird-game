@@ -137,7 +137,7 @@ function q4(
   return { options: opts, optionImages: makeOptImages(opts) };
 }
 
-const triviaData: Omit<GameQuestion, 'id'>[] = [
+function buildTriviaData(): Omit<GameQuestion, 'id'>[] { return [
 
   // ── גודל ─────────────────────────────────────────────────────────────────
   (() => {
@@ -507,14 +507,14 @@ const triviaData: Omit<GameQuestion, 'id'>[] = [
       explanation: 'הדוכיפת נבחרה בהצבעה עממית — מוכרת, יפה ומזוהה עם נוף ישראל.',
     };
   })(),
-];
+]; }
 
 // ─── PICK QUESTIONS ───────────────────────────────────────────────────────────
 
 /** Pick `count` questions: ~27 identify + 7 trivia + 6 compare (visual) */
 export function pickQuestions(count: number): GameQuestion[] {
   const identifyQs  = shuffle(buildIdentifyQuestions());
-  const triviaQs    = shuffle(triviaData.map((q, i) => ({ ...q, id: `trivia-${i}` })));
+  const triviaQs    = shuffle(buildTriviaData().map((q, i) => ({ ...q, id: `trivia-${i}` })));
   const compareQs   = shuffle(buildCompareQuestions());
 
   const compareCount  = Math.min(6, compareQs.length);
