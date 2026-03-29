@@ -1,4 +1,5 @@
 export type AgeMode = '6-8' | '9-11' | '12-15';
+export type ColorTheme = 'warm' | 'ocean' | 'royal';
 
 export interface AgeModeConfig {
   label: string;
@@ -6,11 +7,14 @@ export interface AgeModeConfig {
   showTimer: boolean;
   maxLives: number;
   totalQuestions: number;
-  questionTypes: ('identify' | 'trivia' | 'compare')[];
+  questionTypes: ('identify' | 'trivia' | 'compare' | 'trait')[];
   optionCount: 2 | 4;
   showStreak: boolean;
   enableBonus: boolean;
   fontSize: 'large' | 'normal';
+  maxSkips: number;
+  colorTheme: ColorTheme;
+  readAloud: boolean;
 }
 
 export const AGE_CONFIG: Record<AgeMode, AgeModeConfig> = {
@@ -20,11 +24,14 @@ export const AGE_CONFIG: Record<AgeMode, AgeModeConfig> = {
     showTimer: false,
     maxLives: 5,
     totalQuestions: 20,
-    questionTypes: ['identify'],
+    questionTypes: ['identify', 'trait'],
     optionCount: 2,
     showStreak: false,
     enableBonus: false,
     fontSize: 'large',
+    maxSkips: 5,
+    colorTheme: 'warm',
+    readAloud: true,
   },
   '9-11': {
     label: 'כיתות ג–ה',
@@ -32,11 +39,14 @@ export const AGE_CONFIG: Record<AgeMode, AgeModeConfig> = {
     showTimer: true,
     maxLives: 3,
     totalQuestions: 30,
-    questionTypes: ['identify', 'trivia'],
+    questionTypes: ['identify', 'trivia', 'trait'],
     optionCount: 4,
     showStreak: true,
     enableBonus: true,
     fontSize: 'normal',
+    maxSkips: 3,
+    colorTheme: 'ocean',
+    readAloud: false,
   },
   '12-15': {
     label: 'כיתות ו–ט',
@@ -44,10 +54,13 @@ export const AGE_CONFIG: Record<AgeMode, AgeModeConfig> = {
     showTimer: true,
     maxLives: 3,
     totalQuestions: 40,
-    questionTypes: ['identify', 'trivia', 'compare'],
+    questionTypes: ['identify', 'trivia', 'compare', 'trait'],
     optionCount: 4,
     showStreak: true,
     enableBonus: true,
     fontSize: 'normal',
+    maxSkips: 2,
+    colorTheme: 'royal',
+    readAloud: false,
   },
 };
