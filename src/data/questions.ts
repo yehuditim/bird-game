@@ -510,6 +510,91 @@ function buildTriviaData(): Omit<GameQuestion, 'id'>[] { return [
   })(),
 ]; }
 
+// ─── TRAIT & SEASONAL QUESTIONS ───────────────────────────────────────────────
+function buildTraitAndSeasonalQuestions(): GameQuestion[] {
+  const vq = (
+    id: string,
+    questionText: string,
+    answer: string,
+    others: [string, string, string],
+    explanation: string,
+    isBonus?: boolean,
+  ): GameQuestion => {
+    const opts = shuffle([answer, ...others]);
+    return { id, type: 'trivia', questionText, options: opts, optionImages: makeOptImages(opts), answer, explanation, isBonus };
+  };
+
+  const qs: GameQuestion[] = [];
+
+  // Crest
+  qs.push(vq('trait-crest-1', 'לאיזו ציפור יש ציצית גדולה על הראש?', 'דוכיפת',
+    ['יונה', 'שחרור', 'בולבול'], 'הדוכיפת פותחת ציצית נוצות מרשימה כשהיא נרגשת — סימן זיהוי קלאסי!'));
+  qs.push(vq('trait-crest-2', 'לאיזו ציפור קרקעית יש ציצית על הראש?', 'עפרוני מצויץ',
+    ['דרור הבית', 'ירגזי', 'פשוש'], 'העפרוני מצויץ מזוהה בקלות בציצית שעל ראשו ושר בטיסה.'));
+
+  // Red chest / face
+  qs.push(vq('trait-red-chest', 'לאיזו ציפור יש חזה אדום-כתום בולט?', 'אדום חזה',
+    ['ירגזי', 'דרור הבית', 'עלווית חורף'], 'אדום החזה מזוהה מיד בחזהו הכתום-אדום — ציפורת החורף הסמלית של בריטניה.'));
+  qs.push(vq('trait-red-face', 'לאיזו ציפור יש "מסכה" אדומה על הפנים?', 'חוחית',
+    ['ירקון', 'פרוש מצוי', 'סבכי שחור-ראש'], 'לחוחית פנים אדומות-לבנות כמו מסכת ליצן — פשוט אי אפשר לפספס!'));
+
+  // Metallic / colorful
+  qs.push(vq('trait-blue-metallic', 'לאיזו ציפור יש צבע כחול-מטאלי מבריק?', 'צופית בוהקת',
+    ['פשוש', 'עלווית חורף', 'נחליאלי לבן'], 'הזכר של הצופית הבוהקת לובש כחול-סגול מתכתי מרהיב בעונת הרביה.'));
+  qs.push(vq('trait-colorful', 'איזו ציפור היא הצבעונית ביותר?', 'שרקרק מצוי',
+    ['יונה', 'עורב אפור', 'נחליאלי לבן'], 'השרקרק משלב כחול, ירוק, צהוב ואדום — מהציפורים הצבעוניות ביותר בישראל.', true));
+
+  // Green plumage
+  qs.push(vq('trait-green', 'איזו ציפור יש לה נוצות ירוקות בולטות?', 'דררה',
+    ['שחרור', 'דרור הבית', 'יונה'], 'הדררה היא תוכי ירוק עם מקור אדום — ציפור פולשת שמקורה בהודו.'));
+
+  // Invasive
+  qs.push(vq('trait-invasive-1', 'מי מהציפורים הגיעה לישראל מחוץ לארץ?', 'מאינה',
+    ['בולבול', 'צוצלת', 'ירגזי'], 'המאינה הגיעה מדרום אסיה ומתחרה עם ציפורים מקומיות על קינים.'));
+  qs.push(vq('trait-invasive-2', 'איזו ציפור נחשבת פולשת בישראל?', 'תוכי נזירי',
+    ['דוכיפת', 'בולבול', 'שחרור'], 'התוכי הנזירי ברח מכלובים ומתרבה בשכונות עירוניות — קינו ענק מענפים.', true));
+
+  // Seasonal odd-one-out
+  const winterNames = birds.filter(b => b.seasonal === 'winter').map(b => b.hebrewName);
+  const summerNames = birds.filter(b => b.seasonal === 'summer').map(b => b.hebrewName);
+  const residentNames = birds.filter(b => !b.seasonal).map(b => b.hebrewName);
+
+  // 3 winter + 1 summer = which is NOT a winter visitor?
+  const w3 = shuffle(winterNames).slice(0, 3);
+  const oddS = shuffle(summerNames)[0];
+  if (w3.length === 3 && oddS) {
+    const opts = shuffle([...w3, oddS]);
+    qs.push({ id: 'trait-season-1', type: 'trivia',
+      questionText: 'מי מהציפורים אינה אורחת חורף?',
+      options: opts, optionImages: makeOptImages(opts), answer: oddS,
+      explanation: `${oddS} היא ציפורת קיץ — מגיעה באביב ועוזבת לפני החורף.` });
+  }
+
+  // 1 winter + 3 residents = which IS a winter visitor?
+  const w1 = shuffle(winterNames)[0];
+  const r3 = shuffle(residentNames).slice(0, 3);
+  if (w1 && r3.length === 3) {
+    const opts = shuffle([w1, ...r3]);
+    qs.push({ id: 'trait-season-2', type: 'trivia',
+      questionText: 'מי מגיעה לישראל רק בחורף?',
+      options: opts, optionImages: makeOptImages(opts), answer: w1,
+      explanation: `${w1} היא אורחת חורף — מגיעה בסתיו ועוזבת באביב.` });
+  }
+
+  // 1 summer + 3 residents = which IS a summer visitor?
+  const s1 = shuffle(summerNames)[0];
+  const r3b = shuffle(residentNames).slice(0, 3);
+  if (s1 && r3b.length === 3) {
+    const opts = shuffle([s1, ...r3b]);
+    qs.push({ id: 'trait-season-3', type: 'trivia',
+      questionText: 'מי מהציפורים מגיעה לישראל רק בקיץ?',
+      options: opts, optionImages: makeOptImages(opts), answer: s1,
+      explanation: `${s1} מגיעה לישראל באביב לקינון ועוזבת לפני החורף.`, isBonus: true });
+  }
+
+  return qs;
+}
+
 // ─── PICK QUESTIONS ───────────────────────────────────────────────────────────
 
 /** Pick questions appropriate for the given age mode */
@@ -520,23 +605,22 @@ export function pickQuestions(count: number, mode: AgeMode = '12-15'): GameQuest
   const identifyQs = shuffle(buildIdentifyQuestions());
   const allTrivia  = shuffle(buildTriviaData().map((q, i) => ({ ...q, id: `trivia-${i}` })));
   const allCompare = shuffle(buildCompareQuestions());
+  const allTrait   = shuffle(buildTraitAndSeasonalQuestions());
+
+  const traitCount   = types.includes('trait')   ? Math.min(5, allTrait.length)   : 0;
+  const compareCount = types.includes('compare') ? Math.min(6, allCompare.length) : 0;
+  const triviaCount  = types.includes('trivia')  ? Math.min(7, allTrivia.length)  : 0;
 
   // Build pool based on allowed types
   let pool: GameQuestion[] = [];
 
   if (types.includes('identify')) {
-    const identifyCount = types.length === 1
-      ? count
-      : count - (types.includes('trivia') ? Math.min(7, allTrivia.length) : 0)
-               - (types.includes('compare') ? Math.min(6, allCompare.length) : 0);
+    const identifyCount = count - traitCount - compareCount - triviaCount;
     pool.push(...identifyQs.slice(0, Math.max(0, identifyCount)));
   }
-  if (types.includes('trivia')) {
-    pool.push(...allTrivia.slice(0, Math.min(7, allTrivia.length)));
-  }
-  if (types.includes('compare')) {
-    pool.push(...allCompare.slice(0, Math.min(6, allCompare.length)));
-  }
+  if (types.includes('trivia'))  pool.push(...allTrivia.slice(0, triviaCount));
+  if (types.includes('compare')) pool.push(...allCompare.slice(0, compareCount));
+  if (types.includes('trait'))   pool.push(...allTrait.slice(0, traitCount));
 
   // For 2-option mode, trim each question to 2 choices
   if (cfg.optionCount === 2) {

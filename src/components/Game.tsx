@@ -3,6 +3,7 @@ import { GameQuestion, pickQuestions } from '../data/questions';
 import { ResultScreen } from './ResultScreen';
 import { playCorrect, playWrong } from '../utils/sounds';
 import { AgeMode, AGE_CONFIG } from '../types/ageMode';
+import { speak, stopSpeaking, ttsSupported } from '../utils/tts';
 
 const BASE_POINTS      = 10;
 const SPEED_BONUS      = 5;
@@ -44,14 +45,17 @@ export function Game({ playerName, ageMode, onQuit }: GameProps) {
   const [totalScore,  setTotalScore]  = useState(0);
   const [correctCount,setCorrectCount]= useState(0);
   const [streak,      setStreak]      = useState(0);
+  const [skipsLeft,   setSkipsLeft]   = useState(cfg.maxSkips);
+  const [isSpeaking,  setIsSpeaking]  = useState(false);
   const [timeLeft,    setTimeLeft]    = useState(TIMER_SECONDS);
   const [flashState,  setFlashState]  = useState<'correct' | 'wrong' | null>(null);
   const [imgLoaded,   setImgLoaded]   = useState(false);
   const [imgError,    setImgError]    = useState(false);
   const [finished,    setFinished]    = useState(false);
 
-  const timerRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const maxIdxRef = useRef(0);
+  const timerRef     = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const maxIdxRef    = useRef(0);
+  const speakTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ── Derived ───────────────────────────────────────────────────────────────
   const q          = questions[viewIdx];
@@ -163,8 +167,11 @@ export function Game({ playerName, ageMode, onQuit }: GameProps) {
   }, [viewIdx]);
 
   const handleSkip = useCallback(() => {
+    if (skipsLeft <= 0) return;
     if (timerRef.current) clearTimeout(timerRef.current);
+    stopSpeaking();
     setStreak(0);
+    setSkipsLeft(s => s - 1);
     setRecords(prev => {
       const next = [...prev];
       if (next[maxIdx] === null)
@@ -178,6 +185,22 @@ export function Game({ playerName, ageMode, onQuit }: GameProps) {
       setMaxIdx(next);
       setViewIdx(next);
     }
+  }, [maxIdx, skipsLeft]);
+
+  // ── Read-aloud ────────────────────────────────────────────────────────────
+  const handleReadAloud = useCallback(() => {
+    if (speakTimerRef.current) clearTimeout(speakTimerRef.current);
+    setIsSpeaking(true);
+    const optionText = q.options.map((o, i) => `${['א', 'ב', 'ג', 'ד'][i]}: ${o}`).join('. ');
+    speak(`${q.questionText}. ${optionText}`);
+    // Clear speaking state after estimated duration
+    speakTimerRef.current = setTimeout(() => setIsSpeaking(false), 6000);
+  }, [q]);
+
+  // Stop speaking when question changes
+  useEffect(() => {
+    stopSpeaking();
+    setIsSpeaking(false);
   }, [maxIdx]);
 
   // ── Finish ────────────────────────────────────────────────────────────────
@@ -229,7 +252,7 @@ export function Game({ playerName, ageMode, onQuit }: GameProps) {
     streak >= 3 ? `🔥${streak} ×1.5` : null;
 
   return (
-    <div className={`game-screen${isBonusQ && !isAnswered ? ' bonus-active' : ''}${cfg.fontSize === 'large' ? ' mode-young' : ''}`}>
+    <div className={`game-screen theme-${cfg.colorTheme}${isBonusQ && !isAnswered ? ' bonus-active' : ''}${cfg.fontSize === 'large' ? ' mode-young' : ''}`}>
 
       {/* Screen flash overlay */}
       {flashState && <div className={`screen-flash screen-flash-${flashState}`} />}
@@ -346,10 +369,12 @@ export function Game({ playerName, ageMode, onQuit }: GameProps) {
 
       {/* ── Body ── */}
       <div className="game-body">
-        <p className="question-label">
-          <span className="q-number">שאלה {viewIdx + 1}</span>
-          {q.questionText}
-        </p>
+        <div className="question-panel">
+          <p className="question-label">
+            <span className="q-number">שאלה {viewIdx + 1} מתוך {TOTAL_QUESTIONS}</span>
+            {q.questionText}
+          </p>
+        </div>
 
         {/* ── Options: visual bird cards or text buttons ── */}
         {(() => {
@@ -430,15 +455,26 @@ export function Game({ playerName, ageMode, onQuit }: GameProps) {
           );
         })()}
 
+        {/* ── Read-aloud button (6-8 mode only) ── */}
+        {cfg.readAloud && ttsSupported() && !isAnswered && (
+          <button
+            className={`tts-btn${isSpeaking ? ' tts-speaking' : ''}`}
+            onClick={handleReadAloud}
+            aria-label="הקרא שאלה"
+          >
+            {isSpeaking ? '🔊 מדבר...' : '🔊 הקרא לי'}
+          </button>
+        )}
+
         {/* ── Controls (skip / back) ── */}
         {!isAnswered && isCurrentQ && (
           <div className="controls-row">
             <button className="back-btn" onClick={goBack} disabled={viewIdx === 0}>
               ← קודמת
             </button>
-            {cfg.fontSize !== 'large' && (
+            {skipsLeft > 0 && (
               <button className="skip-btn" onClick={handleSkip}>
-                דלג ←
+                דלג ({skipsLeft}↩)
               </button>
             )}
           </div>
