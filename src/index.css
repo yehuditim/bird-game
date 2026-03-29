@@ -1067,6 +1067,15 @@ body {
   gap: 10px;
 }
 
+/* 2-option layout: vertical stack, full-width cards */
+.options-grid.options-two {
+  grid-template-columns: 1fr;
+  max-width: 400px;
+}
+.options-grid.options-two.options-visual .bird-card-img-wrap {
+  height: 150px;
+}
+
 /* Card overrides: column layout, no fixed height */
 .opt-btn.visual-card {
   flex-direction: column;
@@ -1225,15 +1234,43 @@ body {
    RESPONSIVE
    ================================================ */
 @media (max-width: 480px) {
+  /* Start screen */
   .mm-title { font-size: 1.75rem; }
   .mm-logo-icon { font-size: 44px; }
+
+  /* Age picker: allow cards to shrink gracefully */
+  .age-cards { gap: 7px; }
+  .age-card { padding: 10px 6px; }
+  .age-icon { font-size: 1.5rem; }
+  .age-range { font-size: 0.95rem; }
+  .age-lbl { font-size: 0.65rem; }
+
+  /* Header: smaller dots so 40 fit in 2 rows max */
+  .dot { width: 6px; height: 6px; }
+  .progress-dots { gap: 3px; }
+
+  /* Bigger tap targets for nav/control buttons */
+  .quit-btn { min-height: 44px; padding: 10px 14px; }
+  .back-btn  { min-height: 44px; padding: 11px 22px; }
+  .skip-btn  { min-height: 44px; padding: 11px 22px; }
+  .next-btn  { min-height: 48px; padding: 14px 32px; }
+  .next-btn-sm { min-height: 44px; }
+
+  /* Bird image */
   .bird-image-wrap { max-height: 36vh; }
-  .opt-btn { font-size: 0.88rem; padding: 12px 8px; min-height: 54px; }
+
+  /* Options: 1-column for text buttons on narrow screens */
+  .options-grid:not(.options-visual) { grid-template-columns: 1fr; }
+  .opt-btn { font-size: 0.92rem; padding: 13px 10px; min-height: 54px; }
   .opt-btn.visual-card { min-height: 0; }
   .bird-card-img-wrap { height: 90px; }
   .opt-btn.visual-card .opt-text { font-size: 0.8rem; }
+
+  /* Result screen */
   .result-score-section { padding: 18px 16px 14px; }
   .score-num { font-size: 3.2rem; }
+  .result-banner { padding: 20px 16px 16px; }
+  .wrong-thumb { background: #eef2f8; }
 }
 
 /* ================================================
@@ -1303,11 +1340,19 @@ body {
 /* ================================================
    MODE-YOUNG overrides (ages 6-8)
    ================================================ */
-.mode-young .question-text {
-  font-size: 1.35rem;
-  line-height: 1.5;
+
+/* Bigger question text */
+.mode-young .question-label {
+  font-size: 1.3rem;
+  line-height: 1.55;
 }
 
+/* Bigger bird photo — image-first experience */
+.mode-young .bird-image-wrap {
+  max-height: 50vh;
+}
+
+/* Larger option buttons — easy finger targets */
 .mode-young .opt-btn {
   font-size: 1.1rem;
   min-height: 64px;
@@ -1320,10 +1365,28 @@ body {
   height: 28px;
 }
 
+/* Larger visual card image area */
 .mode-young .bird-card-img-wrap {
   height: 130px;
 }
 
 .mode-young .opt-btn.visual-card .opt-text {
   font-size: 1rem;
+}
+
+/* Bigger "next" button for young kids */
+.mode-young .next-btn {
+  width: 100%;
+  font-size: 1.15rem;
+  padding: 16px 32px;
+}
+
+/* Feedback: bigger bird name display */
+.mode-young .feedback-he {
+  font-size: 1.5rem;
+}
+
+/* Hide the English name — not relevant for 6-8 */
+.mode-young .feedback-en {
+  display: none;
 }
