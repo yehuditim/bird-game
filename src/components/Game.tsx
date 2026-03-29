@@ -190,6 +190,7 @@ export function Game({ playerName, ageMode, onQuit }: GameProps) {
         total={TOTAL_QUESTIONS}
         records={records}
         questions={questions}
+        ageMode={ageMode}
         onRestart={() => window.location.reload()}
       />
     );
@@ -351,70 +352,83 @@ export function Game({ playerName, ageMode, onQuit }: GameProps) {
         </p>
 
         {/* ── Options: visual bird cards or text buttons ── */}
-        {hasImages ? (
-          <div className="options-grid options-visual">
-            {q.options.map((opt, i) => (
-              <button
-                key={opt}
-                className={getOptClass(opt)}
-                onClick={() => handleAnswer(opt)}
-                disabled={isAnswered || isReviewing}
-              >
-                <div className="bird-card-img-wrap">
-                  <img
-                    src={q.optionImages![opt]}
-                    alt={opt}
-                    className="bird-card-img"
-                    onError={e => { (e.target as HTMLImageElement).style.opacity = '0'; }}
-                  />
-                </div>
-                <div className="bird-card-label">
+        {(() => {
+          const twoOpts = q.options.length === 2;
+          const gridClass = `options-grid${hasImages ? ' options-visual' : ''}${twoOpts ? ' options-two' : ''}`;
+          return hasImages ? (
+            <div className={gridClass}>
+              {q.options.map((opt, i) => (
+                <button
+                  key={opt}
+                  className={getOptClass(opt)}
+                  onClick={() => handleAnswer(opt)}
+                  disabled={isAnswered || isReviewing}
+                >
+                  <div className="bird-card-img-wrap">
+                    <img
+                      src={q.optionImages![opt]}
+                      alt={opt}
+                      className="bird-card-img"
+                      onError={e => { (e.target as HTMLImageElement).style.opacity = '0'; }}
+                    />
+                  </div>
+                  <div className="bird-card-label">
+                    <span className="opt-letter">{OPTION_LETTERS[i]}</span>
+                    <span className="opt-text">{opt}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className={gridClass}>
+              {q.options.map((opt, i) => (
+                <button
+                  key={opt}
+                  className={getOptClass(opt)}
+                  onClick={() => handleAnswer(opt)}
+                  disabled={isAnswered || isReviewing}
+                >
                   <span className="opt-letter">{OPTION_LETTERS[i]}</span>
                   <span className="opt-text">{opt}</span>
-                </div>
-              </button>
-            ))}
-          </div>
-        ) : (
-          <div className="options-grid">
-            {q.options.map((opt, i) => (
-              <button
-                key={opt}
-                className={getOptClass(opt)}
-                onClick={() => handleAnswer(opt)}
-                disabled={isAnswered || isReviewing}
-              >
-                <span className="opt-letter">{OPTION_LETTERS[i]}</span>
-                <span className="opt-text">{opt}</span>
-              </button>
-            ))}
-          </div>
-        )}
+                </button>
+              ))}
+            </div>
+          );
+        })()}
 
         {/* ── Feedback ── */}
-        {isAnswered && (
-          <div className={`feedback-panel ${record!.timedOut ? 'wrong' : answerState}`}>
-            <div className="feedback-verdict">
-              {record!.timedOut
-                ? '⏰ פג הזמן!'
-                : answerState === 'correct'
-                  ? `✅ נכון! +${record!.pointsEarned}${isBonusQ ? ' 🌟' : ''}${streakMult(record!.streakAtAnswer) > 1 ? ` 🔥×${streakMult(record!.streakAtAnswer)}` : ''}`
-                  : '❌ לא נכון'}
+        {isAnswered && (() => {
+          const isYoung = cfg.fontSize === 'large';
+          // Truncate explanation to first clause for young kids
+          const shortExplanation = q.explanation.split('—')[0].split('.')[0].trim();
+          const displayFact = isYoung ? shortExplanation : q.explanation;
+
+          const verdictText = record!.timedOut
+            ? (isYoung ? '⏰ אוי, נגמר הזמן!' : '⏰ פג הזמן!')
+            : answerState === 'correct'
+              ? (isYoung
+                  ? '✅ כל הכבוד! 🎉'
+                  : `✅ נכון! +${record!.pointsEarned}${isBonusQ ? ' 🌟' : ''}${streakMult(record!.streakAtAnswer) > 1 ? ` 🔥×${streakMult(record!.streakAtAnswer)}` : ''}`)
+              : (isYoung ? '😅 לא הפעם...' : '❌ לא נכון');
+
+          const nextLabel = viewIdx < maxIdx
+            ? (isYoung ? 'הבא! ←' : 'הבא ←')
+            : maxIdx + 1 >= TOTAL_QUESTIONS
+            ? (isYoung ? '🎊 סיום!' : '🏁 סיום המשחק')
+            : (isYoung ? 'הבא! ←' : 'הבא ←');
+
+          return (
+            <div className={`feedback-panel ${record!.timedOut ? 'wrong' : answerState}`}>
+              <div className="feedback-verdict">{verdictText}</div>
+              <div className="feedback-names">
+                <div className="feedback-he">{q.answer}</div>
+                {q.bird && <div className="feedback-en">{q.bird.englishName}</div>}
+              </div>
+              <div className="feedback-fact">💡 {displayFact}</div>
+              <button className="next-btn" onClick={goNext}>{nextLabel}</button>
             </div>
-            <div className="feedback-names">
-              <div className="feedback-he">{q.answer}</div>
-              {q.bird && <div className="feedback-en">{q.bird.englishName}</div>}
-            </div>
-            <div className="feedback-fact">💡 {q.explanation}</div>
-            <button className="next-btn" onClick={goNext}>
-              {viewIdx < maxIdx
-                ? 'הבא ←'
-                : maxIdx + 1 >= TOTAL_QUESTIONS
-                ? '🏁 סיום המשחק'
-                : 'הבא ←'}
-            </button>
-          </div>
-        )}
+          );
+        })()}
 
         {/* ── Controls (skip / back) ── */}
         {!isAnswered && isCurrentQ && (
@@ -422,9 +436,11 @@ export function Game({ playerName, ageMode, onQuit }: GameProps) {
             <button className="back-btn" onClick={goBack} disabled={viewIdx === 0}>
               ← קודמת
             </button>
-            <button className="skip-btn" onClick={handleSkip}>
-              דלג ←
-            </button>
+            {cfg.fontSize !== 'large' && (
+              <button className="skip-btn" onClick={handleSkip}>
+                דלג ←
+              </button>
+            )}
           </div>
         )}
 
