@@ -103,6 +103,7 @@ export function ResultScreen({
               🔄 שחק שוב!
             </button>
           </div>
+          <p className="result-creator-credit">יצרה: יהודית מנדלבאום</p>
         </div>
       </div>
     );
@@ -193,6 +194,7 @@ export function ResultScreen({
           <button className="btn-primary" onClick={onRestart}>🔄 שחק שוב</button>
           <button className="btn-secondary" onClick={() => setShowBoard(true)}>🏆 לוח תוצאות</button>
         </div>
+        <p className="result-creator-credit">יצרה: יהודית מנדלבאום</p>
       </div>
     </div>
   );

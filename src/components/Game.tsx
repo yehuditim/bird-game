@@ -3,7 +3,8 @@ import { GameQuestion, pickQuestions } from '../data/questions';
 import { ResultScreen } from './ResultScreen';
 import { playCorrect, playWrong } from '../utils/sounds';
 import { AgeMode, AGE_CONFIG } from '../types/ageMode';
-import { speak, stopSpeaking, ttsSupported } from '../utils/tts';
+import { ttsSupported } from '../utils/tts';
+import { AUDIO_PROMPT_MAP, playPromptAudio, stopPromptAudio } from '../utils/audioPrompts';
 
 const BASE_POINTS      = 10;
 const SPEED_BONUS      = 5;
@@ -169,7 +170,7 @@ export function Game({ playerName, ageMode, onQuit }: GameProps) {
   const handleSkip = useCallback(() => {
     if (skipsLeft <= 0) return;
     if (timerRef.current) clearTimeout(timerRef.current);
-    stopSpeaking();
+    stopPromptAudio();
     setStreak(0);
     setSkipsLeft(s => s - 1);
     setRecords(prev => {
@@ -191,15 +192,20 @@ export function Game({ playerName, ageMode, onQuit }: GameProps) {
   const handleReadAloud = useCallback(() => {
     if (speakTimerRef.current) clearTimeout(speakTimerRef.current);
     setIsSpeaking(true);
-    const optionText = q.options.map((o, i) => `${['א', 'ב', 'ג', 'ד'][i]}: ${o}`).join('. ');
-    speak(`${q.questionText}. ${optionText}`);
-    // Clear speaking state after estimated duration
-    speakTimerRef.current = setTimeout(() => setIsSpeaking(false), 6000);
+    const hasWav = !!AUDIO_PROMPT_MAP[q.questionText];
+    if (hasWav) {
+      playPromptAudio(q.questionText);
+      speakTimerRef.current = setTimeout(() => setIsSpeaking(false), 3000);
+    } else {
+      const optionText = q.options.map((o, i) => `${['א', 'ב', 'ג', 'ד'][i]}: ${o}`).join('. ');
+      playPromptAudio(`${q.questionText}. ${optionText}`);
+      speakTimerRef.current = setTimeout(() => setIsSpeaking(false), 6000);
+    }
   }, [q]);
 
-  // Stop speaking when question changes
+  // Stop audio/TTS when question changes
   useEffect(() => {
-    stopSpeaking();
+    stopPromptAudio();
     setIsSpeaking(false);
   }, [maxIdx]);
 
@@ -446,7 +452,11 @@ export function Game({ playerName, ageMode, onQuit }: GameProps) {
             <div className={`feedback-panel ${record!.timedOut ? 'wrong' : answerState}`}>
               <div className="feedback-verdict">{verdictText}</div>
               <div className="feedback-names">
-                <div className="feedback-he">{q.answer}</div>
+                <div className="feedback-he">
+                  {(q.answer === 'נכון' || q.answer === 'לא נכון') && q.bird
+                    ? q.bird.hebrewName
+                    : q.answer}
+                </div>
                 {q.bird && <div className="feedback-en">{q.bird.englishName}</div>}
               </div>
               <div className="feedback-fact">💡 {displayFact}</div>
