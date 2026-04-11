@@ -53,7 +53,7 @@ function buildIdentifyQuestions(): GameQuestion[] {
     type: 'identify' as const,
     bird,
     imageUrl: bird.imageUrl,
-    questionText: 'מה שם הציפור הזו?',
+    questionText: 'מה זאת הציפור בתמונה?',
     options: shuffle([bird.hebrewName, ...getDistractors(bird.hebrewName, 3, names)]),
     answer: bird.hebrewName,
     explanation: bird.funFact,
@@ -595,6 +595,74 @@ function buildTraitAndSeasonalQuestions(): GameQuestion[] {
   return qs;
 }
 
+// ─── REVERSE IDENTIFY QUESTIONS ("מי הX?") — visual card mode ────────────────
+// Show 4 (or 2) bird image cards; ask which one is the named bird.
+function buildReverseIdentifyQuestions(): GameQuestion[] {
+  // Use visually distinctive birds that kids can match by look
+  const distinctiveBirds = birds.filter(b =>
+    ['דוכיפת','שרקרק מצוי','נקר סורי','אנפית בקר','בולבול','חוחית',
+     'ירגזי','שחרור','דררה','אדום חזה','צופית בוהקת','בז מצוי',
+     'נחליאלי לבן','עורבני'].includes(b.hebrewName)
+  );
+  const names = birds.map(b => b.hebrewName);
+
+  return distinctiveBirds.map(bird => {
+    const distractors = getDistractors(bird.hebrewName, 3, names);
+    const opts = shuffle([bird.hebrewName, ...distractors]);
+    return {
+      id: `rev-${bird.id}`,
+      type: 'identify' as const,
+      bird,
+      // No main image — the image cards ARE the options
+      imageUrl: undefined,
+      questionText: `מי ${bird.hebrewName}?`,
+      options: opts,
+      optionImages: makeOptImages(opts)!,
+      answer: bird.hebrewName,
+      explanation: bird.funFact,
+    };
+  });
+}
+
+// ─── YES/NO QUESTIONS ("האם זו X?") ──────────────────────────────────────────
+// Show one bird image; ask if it matches the given name.
+function buildYesNoQuestions(): GameQuestion[] {
+  const qs: GameQuestion[] = [];
+  const shuffled = shuffle([...birds]);
+
+  // Half are "correct" matches (answer = נכון), half are "wrong" name shown
+  shuffled.slice(0, 10).forEach((bird) => {
+    qs.push({
+      id: `yn-yes-${bird.id}`,
+      type: 'identify' as const,
+      bird,
+      imageUrl: bird.imageUrl,
+      questionText: `האם זו ${bird.hebrewName}?`,
+      options: shuffle(['נכון', 'לא נכון']),
+      answer: 'נכון',
+      explanation: bird.funFact,
+    });
+  });
+
+  shuffled.slice(10, 20).forEach((bird, i) => {
+    // Pick a wrong name (different bird)
+    const wrongBird = shuffled.find(b => b.id !== bird.id && b.hebrewName !== bird.hebrewName)
+      ?? shuffled[(i + 5) % shuffled.length];
+    qs.push({
+      id: `yn-no-${bird.id}`,
+      type: 'identify' as const,
+      bird,
+      imageUrl: bird.imageUrl,
+      questionText: `האם זו ${wrongBird.hebrewName}?`,
+      options: shuffle(['נכון', 'לא נכון']),
+      answer: 'לא נכון',
+      explanation: `זו לא ${wrongBird.hebrewName}. זו ${bird.hebrewName}! ${bird.funFact}`,
+    });
+  });
+
+  return qs;
+}
+
 // ─── PICK QUESTIONS ───────────────────────────────────────────────────────────
 
 /** Pick questions appropriate for the given age mode */
@@ -606,6 +674,8 @@ export function pickQuestions(count: number, mode: AgeMode = '12-15'): GameQuest
   const allTrivia  = shuffle(buildTriviaData().map((q, i) => ({ ...q, id: `trivia-${i}` })));
   const allCompare = shuffle(buildCompareQuestions());
   const allTrait   = shuffle(buildTraitAndSeasonalQuestions());
+  const reverseQs  = shuffle(buildReverseIdentifyQuestions());
+  const yesNoQs    = shuffle(buildYesNoQuestions());
 
   const traitCount   = types.includes('trait')   ? Math.min(5, allTrait.length)   : 0;
   const compareCount = types.includes('compare') ? Math.min(6, allCompare.length) : 0;
@@ -616,7 +686,18 @@ export function pickQuestions(count: number, mode: AgeMode = '12-15'): GameQuest
 
   if (types.includes('identify')) {
     const identifyCount = count - traitCount - compareCount - triviaCount;
-    pool.push(...identifyQs.slice(0, Math.max(0, identifyCount)));
+    const cap = Math.max(0, identifyCount);
+
+    if (mode === '6-8') {
+      // For young kids: mix standard identify, reverse ("מי X?"), and yes/no ("האם זו X?")
+      const each = Math.floor(cap / 3);
+      const rem  = cap - each * 3;
+      pool.push(...identifyQs.slice(0, each + rem));
+      pool.push(...reverseQs.slice(0, each));
+      pool.push(...yesNoQs.slice(0, each));
+    } else {
+      pool.push(...identifyQs.slice(0, cap));
+    }
   }
   if (types.includes('trivia'))  pool.push(...allTrivia.slice(0, triviaCount));
   if (types.includes('compare')) pool.push(...allCompare.slice(0, compareCount));
