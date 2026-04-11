@@ -194,8 +194,15 @@ export function Game({ playerName, ageMode, onQuit }: GameProps) {
     setIsSpeaking(true);
     const hasWav = !!AUDIO_PROMPT_MAP[q.questionText];
     if (hasWav) {
+      // Play WAV for the question text, then TTS the options separately
       playPromptAudio(q.questionText);
       speakTimerRef.current = setTimeout(() => setIsSpeaking(false), 3000);
+    } else if (q.hideOptionLabels) {
+      // Reverse-identify: read numbers only, not bird names
+      const numWords = ['אחת', 'שתיים', 'שלוש', 'ארבע'];
+      const optionText = q.options.map((_, i) => `תמונה ${numWords[i] ?? i + 1}`).join(', ');
+      playPromptAudio(`${q.questionText}. ${optionText}`);
+      speakTimerRef.current = setTimeout(() => setIsSpeaking(false), 5000);
     } else {
       const optionText = q.options.map((o, i) => `${['א', 'ב', 'ג', 'ד'][i]}: ${o}`).join('. ');
       playPromptAudio(`${q.questionText}. ${optionText}`);
@@ -386,6 +393,8 @@ export function Game({ playerName, ageMode, onQuit }: GameProps) {
         {(() => {
           const twoOpts = q.options.length === 2;
           const gridClass = `options-grid${hasImages ? ' options-visual' : ''}${twoOpts ? ' options-two' : ''}`;
+          // Reverse-identify: hide names before answer, show number label only
+          const hideLabels = !!q.hideOptionLabels;
           return hasImages ? (
             <div className={gridClass}>
               {q.options.map((opt, i) => (
@@ -398,14 +407,16 @@ export function Game({ playerName, ageMode, onQuit }: GameProps) {
                   <div className="bird-card-img-wrap">
                     <img
                       src={q.optionImages![opt]}
-                      alt={opt}
+                      alt={hideLabels && !isAnswered ? `תמונה ${i + 1}` : opt}
                       className="bird-card-img"
                       onError={e => { (e.target as HTMLImageElement).style.opacity = '0'; }}
                     />
                   </div>
                   <div className="bird-card-label">
-                    <span className="opt-letter">{OPTION_LETTERS[i]}</span>
-                    <span className="opt-text">{opt}</span>
+                    <span className="opt-letter">{i + 1}</span>
+                    {(!hideLabels || isAnswered) && (
+                      <span className="opt-text">{opt}</span>
+                    )}
                   </div>
                 </button>
               ))}
