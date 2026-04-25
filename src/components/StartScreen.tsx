@@ -6,6 +6,8 @@ import { AgeMode, AGE_CONFIG } from '../types/ageMode';
 interface StartScreenProps {
   totalBirds: number;
   onStart: (playerName: string, mode: AgeMode) => void;
+  onBodyParts: () => void;
+  onTwoBirds: () => void;
 }
 
 const AGE_ICONS: Record<AgeMode, string> = {
@@ -32,7 +34,7 @@ const AGE_STARS: Record<AgeMode, number> = {
   '12-15': 3,
 };
 
-export function StartScreen({ totalBirds, onStart }: StartScreenProps) {
+export function StartScreen({ totalBirds, onStart, onBodyParts, onTwoBirds }: StartScreenProps) {
   const [name, setName] = useState('');
   const [mode, setMode] = useState<AgeMode>('9-11');
   const [showBoard, setShowBoard] = useState(false);
@@ -141,6 +143,17 @@ export function StartScreen({ totalBirds, onStart }: StartScreenProps) {
             🏆 לוח תוצאות ({board.length} שחקנים)
           </button>
         )}
+
+        {/* Additional activities */}
+        <div className="gs-activities">
+          <p className="gs-activities-label">פעילויות נוספות</p>
+          <button className="gs-activity-btn" onClick={onBodyParts}>
+            🦴 גוף הציפור — גרור חלקי גוף
+          </button>
+          <button className="gs-activity-btn" onClick={onTwoBirds}>
+            🔍 השווה שתי ציפורים
+          </button>
+        </div>
 
         {/* Creator credit */}
         <p className="gs-creator">יצרה: יהודית מנדלבאום</p>
