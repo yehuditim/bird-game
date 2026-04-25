@@ -22,22 +22,22 @@ interface DropZone {
   r: number;
 }
 
-// Positions in SVG viewBox coordinates (0 0 500 350)
-// Bird faces LEFT, perched on diagonal branch
+// Positions in SVG viewBox coordinates (0 0 540 385)
+// Bird faces LEFT, perched on diagonal branch — matching PDF diagram (Blue Tit style)
 const DROP_ZONES: DropZone[] = [
-  { id: 'כיפה',  cx: 148, cy: 100, r: 30 },
-  { id: 'עין',   cx: 112, cy: 143, r: 22 },
-  { id: 'לחי',   cx: 130, cy: 170, r: 24 },
-  { id: 'מקור',  cx: 63,  cy: 156, r: 24 },
-  { id: 'צוואר', cx: 172, cy: 190, r: 24 },
-  { id: 'חזה',   cx: 180, cy: 218, r: 26 },
-  { id: 'בטן',   cx: 194, cy: 250, r: 26 },
-  { id: 'גב',    cx: 248, cy: 168, r: 28 },
-  { id: 'כנף',   cx: 270, cy: 208, r: 30 },
-  { id: 'שת',    cx: 320, cy: 200, r: 26 },
-  { id: 'זנב',   cx: 388, cy: 174, r: 26 },
-  { id: 'רגל',   cx: 232, cy: 284, r: 24 },
-  { id: 'טופר',  cx: 215, cy: 316, r: 24 },
+  { id: 'כיפה',  cx: 150, cy:  92, r: 30 },
+  { id: 'עין',   cx: 112, cy: 152, r: 22 },
+  { id: 'לחי',   cx: 115, cy: 178, r: 24 },
+  { id: 'מקור',  cx:  52, cy: 168, r: 24 },
+  { id: 'צוואר', cx: 172, cy: 205, r: 24 },
+  { id: 'חזה',   cx: 178, cy: 235, r: 26 },
+  { id: 'בטן',   cx: 195, cy: 270, r: 26 },
+  { id: 'גב',    cx: 260, cy: 162, r: 28 },
+  { id: 'כנף',   cx: 292, cy: 205, r: 30 },
+  { id: 'שת',    cx: 342, cy: 222, r: 26 },
+  { id: 'זנב',   cx: 408, cy: 215, r: 26 },
+  { id: 'רגל',   cx: 238, cy: 312, r: 24 },
+  { id: 'טופר',  cx: 224, cy: 350, r: 24 },
 ];
 
 interface Props {
@@ -64,8 +64,8 @@ export function BodyPartsGame({ onQuit }: Props) {
     if (!svg) return { x: 0, y: 0 };
     const rect = svg.getBoundingClientRect();
     return {
-      x: (clientX - rect.left) / rect.width * 500,
-      y: (clientY - rect.top)  / rect.height * 350,
+      x: (clientX - rect.left) / rect.width  * 540,
+      y: (clientY - rect.top)  / rect.height * 385,
     };
   }
 
@@ -144,87 +144,90 @@ export function BodyPartsGame({ onQuit }: Props) {
       <div className="bp-svg-wrap">
         <svg
           ref={svgRef}
-          viewBox="0 0 500 350"
+          viewBox="0 0 540 385"
           className="bp-bird-svg"
           style={{ pointerEvents: 'none' }}
           xmlns="http://www.w3.org/2000/svg"
         >
-          {/* Branch */}
-          <path d="M 30 318 Q 250 288 470 268" stroke="#8B5E3C" strokeWidth="14" fill="none" strokeLinecap="round"/>
-          <path d="M 30 318 Q 250 296 470 276" stroke="#A0785A" strokeWidth="5" fill="none" strokeLinecap="round" opacity="0.5"/>
+          {/* ── Branch: two parallel diagonal lines (as in PDF) ── */}
+          <path d="M 22,342 L 518,298" stroke="#4A3828" strokeWidth="1.5" fill="none"/>
+          <path d="M 22,357 L 518,313" stroke="#4A3828" strokeWidth="1.5" fill="none"/>
+          <path d="M 22,342 L 518,298 L 518,313 L 22,357 Z" fill="#C4A878"/>
+          <path d="M 22,342 L 518,298" stroke="#6B5040" strokeWidth="2"/>
+          <path d="M 22,357 L 518,313" stroke="#6B5040" strokeWidth="2"/>
 
-          {/* Body – main oval */}
-          <ellipse cx="258" cy="215" rx="108" ry="72"
-            fill="#D6D3CC" stroke="#5A5A5A" strokeWidth="2.5"
-            transform="rotate(-8, 258, 215)"/>
+          {/* ── Tail feathers (horizontal, elongated — as in PDF) ── */}
+          <path d="M 342,207 Q 382,194 432,200 L 432,234 Q 382,240 342,236 Z"
+            fill="#BFBCB6" stroke="#444" strokeWidth="1.8"/>
+          <line x1="344" y1="212" x2="430" y2="204" stroke="#555" strokeWidth="1.2"/>
+          <line x1="344" y1="220" x2="430" y2="213" stroke="#555" strokeWidth="1.2"/>
+          <line x1="344" y1="228" x2="430" y2="222" stroke="#555" strokeWidth="1.2"/>
+          <line x1="344" y1="234" x2="430" y2="231" stroke="#555" strokeWidth="1.2"/>
+          <path d="M 432,200 Q 443,217 432,234" stroke="#444" strokeWidth="2" fill="none"/>
 
-          {/* Wing area (on top of body) */}
-          <ellipse cx="268" cy="208" rx="82" ry="48"
-            fill="#B0ADA6" stroke="#5A5A5A" strokeWidth="1.5"
-            transform="rotate(-5, 268, 208)"/>
+          {/* ── Main body (very round — matching PDF) ── */}
+          <ellipse cx="250" cy="235" rx="110" ry="100"
+            fill="#D2CFCA" stroke="#444" strokeWidth="2.5"/>
 
-          {/* Wing feather lines */}
-          {[0,1,2,3,4].map(i => (
+          {/* ── Wing (upper-right area of body, darker gray with feather bands) ── */}
+          <path d="M 196,164 Q 270,146 345,187 Q 362,208 356,235
+                   Q 322,222 286,217 Q 245,210 196,202 Q 180,182 196,164 Z"
+            fill="#A8A49E" stroke="#444" strokeWidth="1.8"/>
+          <path d="M 202,180 Q 276,162 345,187" stroke="#555" strokeWidth="1.3" fill="none"/>
+          <path d="M 200,194 Q 276,178 348,200" stroke="#555" strokeWidth="1.3" fill="none"/>
+          <path d="M 200,208 Q 276,195 352,215" stroke="#555" strokeWidth="1.3" fill="none"/>
+          {[0,1,2,3].map(i => (
             <path key={i}
-              d={`M ${200+i*17} ${172+i*3} Q ${222+i*12} ${198+i*4} ${232+i*9} ${218+i*3}`}
-              stroke="#6b7280" strokeWidth="1.2" fill="none" opacity="0.45"/>
+              d={`M ${332+i*6},${188+i*11} Q ${358+i*3},${193+i*11} ${354+i*5},${204+i*11}`}
+              stroke="#555" strokeWidth="1" fill="none"/>
           ))}
 
-          {/* Rump area (שת) */}
-          <ellipse cx="322" cy="200" rx="34" ry="23"
-            fill="#C0BDB6" stroke="none"
-            transform="rotate(-6, 322, 200)" opacity="0.8"/>
+          {/* ── Belly (lighter, left-lower part of body) ── */}
+          <ellipse cx="218" cy="268" rx="82" ry="68"
+            fill="#E2DFD8" stroke="none"/>
 
-          {/* Tail feathers */}
-          <path d="M 346,193 L 400,157 L 408,170 L 358,206 Z"
-            fill="#B0ADA6" stroke="#5A5A5A" strokeWidth="1.5"/>
-          <path d="M 346,199 L 403,176 L 410,190 L 358,212 Z"
-            fill="#D6D3CC" stroke="#5A5A5A" strokeWidth="1.5"/>
-          <path d="M 348,206 L 402,194 L 406,208 L 358,218 Z"
-            fill="#B0ADA6" stroke="#5A5A5A" strokeWidth="1.5"/>
+          {/* ── Head (large, very round) ── */}
+          <circle cx="150" cy="162" r="74"
+            fill="#D2CFCA" stroke="#444" strokeWidth="2.5"/>
 
-          {/* Head */}
-          <circle cx="145" cy="155" r="60"
-            fill="#D6D3CC" stroke="#5A5A5A" strokeWidth="2.5"/>
+          {/* ── Crown (darker, top of head) ── */}
+          <path d="M 90,150 Q 150,84 210,150 Q 196,112 150,102 Q 104,112 90,150 Z"
+            fill="#9A9892" stroke="none"/>
 
-          {/* Crown (כיפה) – darker top area */}
-          <ellipse cx="148" cy="112" rx="46" ry="36"
-            fill="#B0ADA6" stroke="none"/>
+          {/* ── Cheek patch (prominent white/light — לחי) ── */}
+          <ellipse cx="116" cy="180" rx="40" ry="34"
+            fill="#F2EFEC" stroke="none"/>
 
-          {/* Cheek (לחי) – lighter patch */}
-          <ellipse cx="132" cy="170" rx="32" ry="24"
-            fill="#E8E6E2" stroke="none"/>
+          {/* ── Beak (short, slightly hooked — מקור) ── */}
+          <path d="M 80,164 Q 58,167 44,172 Q 58,175 80,177 Z"
+            fill="#D8C050" stroke="#A08020" strokeWidth="1.5"/>
 
-          {/* Beak */}
-          <polygon points="87,150 87,164 48,157"
-            fill="#F0C040" stroke="#C8A000" strokeWidth="1.5"/>
+          {/* ── Eye ── */}
+          <circle cx="112" cy="154" r="13" fill="#1a1a1a"/>
+          <circle cx="107" cy="149" r="5.5" fill="white"/>
+          <circle cx="106" cy="148" r="2.5" fill="#1a1a1a"/>
 
-          {/* Eye */}
-          <circle cx="112" cy="145" r="11" fill="#1e293b"/>
-          <circle cx="108" cy="141" r="4.5" fill="white"/>
-          <circle cx="107" cy="140" r="2"   fill="#1e293b"/>
+          {/* ── Legs ── */}
+          <line x1="236" y1="329" x2="222" y2="345"
+            stroke="#7A6550" strokeWidth="5" strokeLinecap="round"/>
+          <line x1="262" y1="332" x2="270" y2="345"
+            stroke="#7A6550" strokeWidth="5" strokeLinecap="round"/>
 
-          {/* Legs */}
-          <line x1="228" y1="275" x2="214" y2="305"
-            stroke="#7A6A58" strokeWidth="5" strokeLinecap="round"/>
-          <line x1="248" y1="278" x2="256" y2="304"
-            stroke="#7A6A58" strokeWidth="5" strokeLinecap="round"/>
+          {/* ── Left foot claws ── */}
+          <path d="M 222,345 Q 202,351 186,354"
+            stroke="#7A6550" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
+          <path d="M 222,345 Q 218,358 214,366"
+            stroke="#7A6550" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
+          <path d="M 222,345 Q 237,352 246,354"
+            stroke="#7A6550" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
 
-          {/* Left foot claws */}
-          <path d="M 214,305 Q 195,311 182,314"
-            stroke="#7A6A58" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
-          <path d="M 214,305 Q 211,317 207,324"
-            stroke="#7A6A58" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
-          <path d="M 214,305 Q 227,312 235,314"
-            stroke="#7A6A58" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
-
-          {/* Right foot claws */}
-          <path d="M 256,304 Q 242,310 232,313"
-            stroke="#7A6A58" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
-          <path d="M 256,304 Q 256,316 252,323"
-            stroke="#7A6A58" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
-          <path d="M 256,304 Q 268,308 276,307"
-            stroke="#7A6A58" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
+          {/* ── Right foot claws ── */}
+          <path d="M 270,345 Q 254,351 243,355"
+            stroke="#7A6550" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
+          <path d="M 270,345 Q 269,358 265,366"
+            stroke="#7A6550" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
+          <path d="M 270,345 Q 282,348 290,347"
+            stroke="#7A6550" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
 
           {/* Drop zones */}
           {DROP_ZONES.map(zone => {
