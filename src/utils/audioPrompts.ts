@@ -30,13 +30,37 @@ export function playPromptAudio(text: string): void {
   }
 }
 
+// Cache the best Hebrew voice once found
+let _hebrewVoice: SpeechSynthesisVoice | null | undefined = undefined;
+
+function getHebrewVoice(): SpeechSynthesisVoice | null {
+  if (_hebrewVoice !== undefined) return _hebrewVoice;
+  const voices = window.speechSynthesis.getVoices();
+  // Prefer native he-IL, fall back to any Hebrew variant
+  _hebrewVoice =
+    voices.find(v => v.lang === 'he-IL' && v.localService) ??
+    voices.find(v => v.lang === 'he-IL') ??
+    voices.find(v => v.lang.startsWith('he') || v.lang.startsWith('iw')) ??
+    null;
+  return _hebrewVoice;
+}
+
 function speakFallback(text: string): void {
   if (!('speechSynthesis' in window)) return;
   const utt = new SpeechSynthesisUtterance(text);
   utt.lang = 'he-IL';
-  utt.rate = 0.88;
-  utt.pitch = 1.1;
+  utt.rate = 0.82;   // slightly slower → clearer pronunciation
+  utt.pitch = 1.0;
+  const voice = getHebrewVoice();
+  if (voice) utt.voice = voice;
   window.speechSynthesis.speak(utt);
+}
+
+// Re-cache voices when they become available (async on some browsers)
+if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+  window.speechSynthesis.addEventListener('voiceschanged', () => {
+    _hebrewVoice = undefined; // force re-detection
+  });
 }
 
 export function stopPromptAudio(): void {

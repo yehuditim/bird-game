@@ -8,6 +8,8 @@ export interface GameQuestion {
   imageUrl?: string;
   /** Present when options are bird names that have images — enables visual card mode */
   optionImages?: Record<string, string>;
+  /** Hide option text labels until answered (reverse-identify questions) */
+  hideOptionLabels?: boolean;
   questionText: string;
   options: string[];
   answer: string;
@@ -618,6 +620,7 @@ function buildReverseIdentifyQuestions(): GameQuestion[] {
       questionText: `מי ${bird.hebrewName}?`,
       options: opts,
       optionImages: makeOptImages(opts)!,
+      hideOptionLabels: true,
       answer: bird.hebrewName,
       explanation: bird.funFact,
     };

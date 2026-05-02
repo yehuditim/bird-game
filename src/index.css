@@ -1208,6 +1208,12 @@ body {
   background: inherit;
 }
 
+/* When only the number is shown (hideOptionLabels, unanswered): center it */
+.bird-card-label:has(.opt-letter:only-child),
+.bird-card-label:not(:has(.opt-text)) {
+  justify-content: center;
+}
+
 .opt-btn.visual-card .opt-letter {
   width: 22px;
   height: 22px;
