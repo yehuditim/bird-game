@@ -1145,7 +1145,7 @@ body {
   max-width: 400px;
 }
 .options-grid.options-two.options-visual .bird-card-img-wrap {
-  height: 150px;
+  height: 220px;
 }
 
 /* Card overrides: column layout, no fixed height */
@@ -1167,7 +1167,7 @@ body {
 /* Bird photo area */
 .bird-card-img-wrap {
   width: 100%;
-  height: 110px;
+  height: 130px;
   overflow: hidden;
   background: #071525;
   position: relative;
@@ -1177,10 +1177,9 @@ body {
 .bird-card-img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   object-position: center;
   transition: transform 0.25s;
-  padding: 4px;
 }
 
 .opt-btn.visual-card:hover:not(:disabled) .bird-card-img {
@@ -1341,7 +1340,8 @@ body {
   .options-grid:not(.options-visual) { grid-template-columns: 1fr; }
   .opt-btn { font-size: 0.92rem; padding: 13px 10px; min-height: 54px; }
   .opt-btn.visual-card { min-height: 0; }
-  .bird-card-img-wrap { height: 90px; }
+  .bird-card-img-wrap { height: 100px; }
+  .options-grid.options-two.options-visual .bird-card-img-wrap { height: 190px; }
   .opt-btn.visual-card .opt-text { font-size: 0.8rem; }
 
   /* Result screen */
@@ -1445,7 +1445,10 @@ body {
 
 /* Larger visual card image area */
 .mode-young .bird-card-img-wrap {
-  height: 130px;
+  height: 160px;
+}
+.mode-young .options-grid.options-two.options-visual .bird-card-img-wrap {
+  height: 240px;
 }
 
 .mode-young .opt-btn.visual-card .opt-text {
